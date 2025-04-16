@@ -5,11 +5,15 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Link, useNavigate } from 'react-router-dom';
 import useCategory from '../../hook/useCategory';
 import { FaX } from 'react-icons/fa6';
+import { toast } from 'sonner';
+import DeleteConfirmationModal from '../../components/modals/DeleteConfirmationModal';
 
 export default function Categories() {
   const { categories, loading, error, updateCategoryStatus, deleteCategory } = useCategory();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
   const rowsPerPage = 5;
   const navigate = useNavigate();
 
@@ -46,15 +50,30 @@ export default function Categories() {
     updateCategoryStatus(catId, updatedCategories);
   };
 
-  const handleDelete = async (catId) => {
-    const isConfirmed = window.confirm('Are you sure you want to delete this category?');
-    if (isConfirmed) {
-      await deleteCategory(catId);
+  const confirmDelete = (catId) => {
+    setDeleteId(catId);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirmed = async () => {
+    if (deleteId) {
+      await deleteCategory(deleteId);
+      toast.success("Category deleted successfully!");
+      setDeleteId(null);
+      setShowDeleteModal(false);
     }
   };
 
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setDeleteId(null);
+  };
+
+
   return (
     <CommonLayout>
+      <DeleteConfirmationModal show={showDeleteModal} onCancel={handleDeleteCancel} onConfirm={handleDeleteConfirmed} />
+
       <div className="flex flex-col gap-5 p-5">
         <div className="flex justify-between md:flex-row flex-col gap-3 md:items-center">
           <h1 className="text-2xl font-semibold">Categories</h1>
@@ -143,7 +162,7 @@ export default function Categories() {
                                     <button
                                       className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md"
                                       title="Delete"
-                                      onClick={() => handleDelete(cat._id)}
+                                      onClick={() => confirmDelete(cat._id)}
                                     >
                                       <FaTrash />
                                     </button>

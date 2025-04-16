@@ -90,79 +90,139 @@ export default function App() {
             <Route path="createsystem-addons" element={<AddAddonsManager />} />
 
             {/* POS */}
-            <Route path="pos/items" element={<PosProducts />} />
-            <Route path="pos/orders" element={<PosOrder />} />
-            <Route path="pos/items/checkout" element={<Checkout />} />
+            <Route path="pos">
+              <Route path='items' element={<PosProducts />} />
+              <Route path="orders" element={<PosOrder />} />
+              <Route path="items/checkout" element={<Checkout />} />
+            </Route>
 
             {/* Order Management */}
             <Route path="orders" element={<Orders />} />
             <Route path="report" element={<Report />} />
 
             {/* Product Management */}
-            <Route path="category" element={<Categories />} />
-            <Route path="category/add" element={<AddCategory />} />
-            <Route path="category/:id" element={<AddCategory />} />
-            <Route path="sub-category" element={<Subcategories />} />
-            <Route path="sub-category/add" element={<AddSubcategories />} />
-            <Route path="tax" element={<Tax />} />
-            <Route path="tax/add" element={<AddTax />} />
-            <Route path="extras" element={<GlobalExtras />} />
-            <Route path="extras/add" element={<AddGlobalExtras />} />
-            <Route path="item" element={<Products />} />
-            <Route path="item/add" element={<AddProducts />} />
+            <Route path="category">
+              <Route index element={<Categories />} />
+              <Route path="add" element={<AddCategory />} />
+              <Route path=":id" element={<AddCategory />} />
+            </Route>
+            <Route path="sub-category">
+              <Route index element={<Subcategories />} />
+              <Route path="add" element={<AddSubcategories />} />
+              <Route path=":id" element={<AddSubcategories />} />
+            </Route>
+            <Route path="tax">
+              <Route index element={<Tax />} />
+              <Route path="add" element={<AddTax />} />
+              <Route path=":id" element={<AddTax />} />
+            </Route>
+            <Route path="extras">
+              <Route index element={<GlobalExtras />} />
+              <Route path="add" element={<AddGlobalExtras />} />
+              <Route path=":id" element={<AddGlobalExtras />} />
+            </Route>
+            <Route path="item">
+              <Route index element={<Products />} />
+              <Route path="add" element={<AddProducts />} />
+              <Route path=":id" element={<AddProducts />} />
+              <Route path="import" element={<BulkImportProducts />} />
+            </Route>
             <Route path="product_review" element={<ProductReviews />} />
-            <Route path="item/import" element={<BulkImportProducts />} />
             <Route path="media" element={<Media />} />
 
             {/* Promotions */}
-            <Route path="slider" element={<Slider />} />
-            <Route path="slider/add" element={<AddSlider />} />
+            <Route path="slider">
+              <Route index element={<Slider />} />
+              <Route path="add" element={<AddSlider />} />
+              <Route path=":id" element={<AddSlider />} />
+            </Route>
             <Route path="banner/:id" element={<Banner />} />
             <Route path="banner/:id/add" element={<AddBanner />} />
-            <Route path="promocode" element={<Coupons />} />
-            <Route path="promocode/add" element={<AddCoupons />} />
-            <Route path="firebase" element={<FirebaseNotification />} />
-            <Route path="firebase/add" element={<AddFirebaseNotification />} />
+            <Route path="promocode">
+              <Route index element={<Slider />} />
+              <Route path="add" element={<AddCoupons />} />
+              <Route path=":id" element={<AddCoupons />} />
+            </Route>
+            <Route path="firebase">
+              <Route index element={<FirebaseNotification />} />
+              <Route path="add" element={<AddFirebaseNotification />} />
+            </Route>
             <Route path="top_deals" element={<TopDeal />} />
 
             {/* Restaurant Management */}
             <Route path="time" element={<WorkingHours />} />
-            <Route path="custom_status" element={<CustomStatus />} />
-            <Route path="custom_status/add" element={<AddCustomStatus />} />
+            <Route path="custom_status">
+              <Route index element={<CustomStatus />} />
+              <Route path="add" element={<AddCustomStatus />} />
+              <Route path=":id" element={<AddCustomStatus />} />
+            </Route>
             <Route path="payment" element={<PaymentMethods />} />
-            <Route path="reviews" element={<StoreReviews />} />
-            <Route path="reviews/add" element={<AddStoreReviews />} />
+            <Route path="reviews">
+              <Route index element={<StoreReviews />} />
+              <Route path="add" element={<AddStoreReviews />} />
+              <Route path=":id" element={<AddStoreReviews />} />
+            </Route>
             <Route path="contact" element={<Enquiries />} />
-            <Route path="choose_us" element={<WhyChooseUs />} />
-            <Route path="choose_us/add" element={<AddWhyChooseUs />} />
+            <Route path="choose_us">
+              <Route index element={<WhyChooseUs />} />
+              <Route path="add" element={<AddWhyChooseUs />} />
+              <Route path=":id" element={<AddWhyChooseUs />} />
+            </Route>
 
             {/* User Management */}
-            <Route path="users" element={<Customers />} />
-            <Route path="users/add" element={<AddCustomers />} />
-            <Route path="driver" element={<DeliveryMan />} />
-            <Route path="driver/add" element={<AddDeliveryMan />} />
+            <Route path="users">
+              <Route index element={<Customers />} />
+              <Route path="add" element={<AddCustomers />} />
+              <Route path=":id" element={<AddCustomers />} />
+            </Route>
+            <Route path="driver">
+              <Route index element={<DeliveryMan />} />
+              <Route path="add" element={<AddDeliveryMan />} />
+              <Route path=":id" element={<AddDeliveryMan />} />
+            </Route>
 
             {/* Employee Management */}
-            <Route path="roles" element={<EmployeeRoles />} />
-            <Route path="roles/add" element={<AddEmployeeRoles />} />
-            <Route path="employees" element={<Employee />} />
-            <Route path="employees/add" element={<AddEmployee />} />
+            <Route path="roles">
+              <Route index element={<EmployeeRoles />} />
+              <Route path="add" element={<AddEmployeeRoles />} />
+              <Route path=":id" element={<AddEmployeeRoles />} />
+            </Route>
+            <Route path="employees">
+              <Route index element={<Employee />} />
+              <Route path="add" element={<AddEmployee />} />
+              <Route path=":id" element={<AddEmployee />} />
+            </Route>
 
             {/* System Settings */}
             <Route path="aboutus" element={<AboutUs />} />
             <Route path="privacypolicy" element={<PrivacyPolicy />} />
             <Route path="refundpolicy" element={<RefundPolicy />} />
             <Route path="termscondition" element={<TermsConditions />} />
-            <Route path="blogs" element={<Blogs />} />
-            <Route path="blogs/add" element={<AddBlog />} />
-            <Route path="our-team" element={<OurTeam />} />
-            <Route path="our-team/add" element={<AddOurTeam />} />
-            <Route path="tutorial" element={<Tutorial />} />
-            <Route path="tutorial/add" element={<AddTutorial />} />
-            <Route path="faq" element={<FAQs />} />
-            <Route path="faq/add" element={<AddFAQ />} />
-            <Route path="gallery" element={<Gallery />} />
-            <Route path="gallery/add" element={<AddGallery />} />
+            <Route path="blogs">
+              <Route index element={<Blogs />} />
+              <Route path="add" element={<AddBlog />} />
+              <Route path=":id" element={<AddBlog />} />
+            </Route>
+            <Route path="our-team">
+              <Route index element={<OurTeam />} />
+              <Route path="add" element={<AddOurTeam />} />
+              <Route path=":id" element={<AddOurTeam />} />
+            </Route>
+            <Route path="tutorial">
+              <Route index element={<Tutorial />} />
+              <Route path="add" element={<AddTutorial />} />
+              <Route path=":id" element={<AddTutorial />} />
+            </Route>
+            <Route path="faq">
+              <Route index element={<FAQs />} />
+              <Route path="add" element={<AddFAQ />} />
+              <Route path=":id" element={<AddFAQ />} />
+            </Route>
+            <Route path="gallery">
+              <Route index element={<Gallery />} />
+              <Route path="add" element={<AddGallery />} />
+              <Route path=":id" element={<AddGallery />} />
+            </Route>
             <Route path="subscribers" element={<EmailSubscribers />} />
             <Route path="settings" element={<GeneralSettings />} />
             <Route path="whatsapp_settings" element={<Whatsappsettings />} />
@@ -170,7 +230,7 @@ export default function App() {
             <Route path="language-settings" element={<Language />} />
           </Route>
         </Routes>
-      </BrowserRouter>
+      </BrowserRouter >
 
       <Toaster duration={3000} />
     </>

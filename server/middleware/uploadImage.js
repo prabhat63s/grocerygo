@@ -11,7 +11,7 @@ const storage = multer.diskStorage({
     if (req.baseUrl.includes("users")) {
       uploadPath = "uploads/users/";
     } else if (req.baseUrl.includes("categories")) {
-      uploadPath = "uploads/category/";
+      uploadPath = "uploads/categories/";
     } else if (req.baseUrl.includes("products")) {
       uploadPath = "uploads/products/";
     } else if (req.baseUrl.includes("why-choose-us")) {
@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
     // Ensure the destination directory exists, create it if it doesn't
     fs.promises.mkdir(uploadPath, { recursive: true })
       .then(() => {
-        cb(null, uploadPath); // Set the destination folder after ensuring it exists
+        cb(null, uploadPath);
       })
       .catch((err) => {
         console.error("Error creating directory:", err);

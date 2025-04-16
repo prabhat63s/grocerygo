@@ -2,53 +2,64 @@ import Product from "../models/productModel.js";
 
 // Create product
 export const createProduct = async (req, res) => {
-    try {
-      const {
-        name, sku, videoURL, category, subCategory, type,
-        hasExtras, extras, hasVariants, variants,
-        originalPrice, sellingPrice, manageStock, stockQty,
-        minOrderQty, maxOrderQty, lowQtyWarning,
-        description, tax
-      } = req.body;
+  try {
+    const {
+      name, sku, videoURL, category, subCategory, type,
+      hasExtras, extras, hasVariants, variants,
+      originalPrice, sellingPrice, stockManagement, stock, description, tax
+    } = req.body;
 
-      const domainName = req.protocol + "://" + req.get("host");
-      const images = req.files?.map(file => `${domainName}/uploads/category/${file.filename}`) || [];
+    // Image
+    const domainName = req.protocol + "://" + req.get("host");
+    const productImage = req.files?.map(file => `${domainName}/uploads/products/${file.filename}`) || [];
 
-      const productExists = await Product.findOne({ name });
-      if (productExists) {
-        return res.status(400).json({ message: "Product already exists" });
-      }
-
-      const product = new Product({
-        name,
-        sku,
-        videoURL,
-        category,
-        subCategory,
-        type,
-        hasExtras,
-        extras,
-        hasVariants,
-        variants,
-        originalPrice,
-        sellingPrice,
-        manageStock,
-        stockQty,
-        minOrderQty,
-        maxOrderQty,
-        lowQtyWarning,
-        description,
-        tax,
-        images
-      });
-
-      await product.save();
-      res.status(201).json({ message: "Product created", product });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: error.message });
+    if (!name || !category || !type || !originalPrice || !sellingPrice || productImage.length === 0) {
+      return res.status(400).json({ message: "Name, category, type, prices and at least one image are required." });
     }
-  };
+
+    let parsedExtras = [], parsedVariants = [], parsedStockManagement = [], parsedTax = [];
+    try {
+      parsedExtras = extras ? JSON.parse(extras) : [];
+      parsedVariants = variants ? JSON.parse(variants) : [];
+      parsedStockManagement = stock ? JSON.parse(stock) : [];
+      parsedTax = tax ? Array.isArray(tax) ? tax : [tax] : [];
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid JSON format in extras, variants, or stock." });
+    }
+
+    const normalizedName = name.trim();
+    const productExists = await Product.findOne({ name: normalizedName });
+    if (productExists) {
+      return res.status(400).json({ message: "Product already exists" });
+    }
+
+    const product = new Product({
+      name: normalizedName,
+      sku,
+      videoURL,
+      category,
+      subCategory,
+      type,
+      hasExtras,
+      extras: parsedExtras,
+      hasVariants,
+      variants: parsedVariants,
+      originalPrice,
+      sellingPrice,
+      stockManagement,
+      stock: parsedStockManagement,
+      description,
+      tax: parsedTax,
+      productImage
+    });
+
+    await product.save();
+    res.status(201).json({ message: "Product created", product });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // Get all products
 export const getAllProducts = async (req, res) => {
@@ -75,27 +86,66 @@ export const getProductById = async (req, res) => {
 
 // Update product
 export const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      name, sku, videoURL, category, subCategory, type,
+      hasExtras, extras, hasVariants, variants,
+      originalPrice, sellingPrice, stockManagement, stock, description, tax, productImage
+    } = req.body;
+
+    // Parse JSON data for extras, variants, and stockManagement
+    let parsedExtras = [], parsedVariants = [], parsedStockManagement = [], parsedTax = [];
     try {
-      const product = await Product.findById(req.params.id);
-      if (!product) return res.status(404).json({ message: "Product not found" });
-
-      const updates = req.body;
-      const domainName = req.protocol + "://" + req.get("host");
-
-      const images = req.files?.map(file => `${domainName}/uploads/category/${file.filename}`);
-      if (images && images.length) {
-        product.images = images;
-      }
-
-      Object.assign(product, updates);
-
-      await product.save();
-      res.json({ message: "Product updated", product });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: error.message });
+      parsedExtras = extras ? JSON.parse(extras) : [];
+      parsedVariants = variants ? JSON.parse(variants) : [];
+      parsedStockManagement = stock ? JSON.parse(stock) : [];
+      parsedTax = tax ? Array.isArray(tax) ? tax : [tax] : [];
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid JSON format in extras, variants, or stock." });
     }
-  };
+
+    // Find the existing product
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Update product fields
+    product.name = name || product.name;
+    product.sku = sku || product.sku;
+    product.videoURL = videoURL || product.videoURL;
+    product.category = category || product.category;
+    product.subCategory = subCategory || product.subCategory;
+    product.type = type || product.type;
+    product.hasExtras = hasExtras !== undefined ? hasExtras : product.hasExtras;
+    product.extras = parsedExtras.length > 0 ? parsedExtras : product.extras;
+    product.hasVariants = hasVariants !== undefined ? hasVariants : product.hasVariants;
+    product.variants = parsedVariants.length > 0 ? parsedVariants : product.variants;
+    product.originalPrice = originalPrice || product.originalPrice;
+    product.sellingPrice = sellingPrice || product.sellingPrice;
+    product.stockManagement = stockManagement !== undefined ? stockManagement : product.stockManagement;
+    product.stock = parsedStockManagement.length > 0 ? parsedStockManagement : product.stock;
+    product.description = description || product.description;
+    product.tax = parsedTax.length > 0 ? parsedTax : product.tax;
+
+    // Handle image updates (optional, only update if new images are provided)
+    if (productImage) {
+      const domainName = req.protocol + "://" + req.get("host");
+      const updatedImages = req.files?.map(file => `${domainName}/uploads/products/${file.filename}`) || [];
+      product.productImage = updatedImages.length > 0 ? updatedImages : product.productImage;
+    }
+
+    // Save the updated product
+    await product.save();
+
+    // Return the updated product
+    res.status(200).json({ message: "Product updated successfully", product });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // Delete product
 export const deleteProduct = async (req, res) => {

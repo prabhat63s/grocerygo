@@ -5,14 +5,14 @@ export const createCategory = async (req, res) => {
     try {
         const { name } = req.body;
         const domainName = req.protocol + "://" + req.get("host");
-        const image = req.file ? `${domainName}/uploads/category/${req.file.filename}` : "";
+        const categoryImage = req.file ? `${domainName}/uploads/categories/${req.file.filename}` : "";
 
         const categoryExists = await Category.findOne({ name });
         if (categoryExists) {
             return res.status(400).json({ message: "Category already exists" });
         }
 
-        const category = new Category({ name, image });
+        const category = new Category({ name, categoryImage });
         await category.save();
 
         res.status(201).json({ message: "Category created", category });
@@ -52,7 +52,7 @@ export const updateCategory = async (req, res) => {
         // Log req.file to check if file is uploaded
         console.log("Uploaded File:", req.file);
 
-        const image = req.file ? `${domainName}/uploads/category/${req.file.filename}` : null;
+        const categoryImage = req.file ? `${domainName}/uploads/categories/${req.file.filename}` : null;
 
         const category = await Category.findById(req.params.id);
         if (!category) return res.status(404).json({ message: "Category not found" });
@@ -60,7 +60,7 @@ export const updateCategory = async (req, res) => {
         // Update category details
         category.name = name || category.name;
         category.status = status !== undefined ? status : category.status;
-        if (image) category.image = image;
+        if (categoryImage) category.categoryImage = categoryImage;
 
         await category.save();
         res.status(200).json({ message: "Category updated", category });

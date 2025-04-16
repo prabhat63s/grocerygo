@@ -85,7 +85,7 @@ const ChangePasswordModal = ({ isOpen, setIsOpen }) => {
                                         className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700"
                                         tabIndex={-1}
                                     >
-                                        {showOldPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+                                        {showOldPassword ? <FaEye className="w-5 h-5" /> : <FaEyeSlash className="w-5 h-5" />}
                                     </button>
                                 </div>
                             </div>
@@ -108,7 +108,7 @@ const ChangePasswordModal = ({ isOpen, setIsOpen }) => {
                                         className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700"
                                         tabIndex={-1}
                                     >
-                                        {showNewPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+                                        {showNewPassword ? <FaEye className="w-5 h-5" /> : <FaEyeSlash className="w-5 h-5" />}
                                     </button>
                                 </div>
                             </div>
@@ -131,7 +131,7 @@ const ChangePasswordModal = ({ isOpen, setIsOpen }) => {
                                         className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700"
                                         tabIndex={-1}
                                     >
-                                        {showConfirmPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+                                        {showConfirmPassword ? <FaEye className="w-5 h-5" /> : <FaEyeSlash className="w-5 h-5" />}
                                     </button>
                                 </div>
                             </div>

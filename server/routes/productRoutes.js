@@ -18,7 +18,7 @@ import { uploadImage } from '../middleware/uploadImage.js';
 const router = express.Router();
 
 // Create a new product
-router.post('/', protect, isAdmin, uploadImage.single("image"), createProduct);
+router.post('/', protect, isAdmin, uploadImage.array("productImage", 5), createProduct);
 
 // Get all products
 router.get('/', getAllProducts);
@@ -27,7 +27,7 @@ router.get('/', getAllProducts);
 router.get('/:id', getProductById);
 
 // Update a product
-router.put('/:id', protect, isAdmin, uploadImage.single("image"), updateProduct);
+router.put('/:id', protect, isAdmin, uploadImage.array("productImage", 5), updateProduct);
 
 // Delete a product
 router.delete('/:id', protect, isAdmin, deleteProduct);

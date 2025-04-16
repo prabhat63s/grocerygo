@@ -7,6 +7,7 @@ import userRoutes from './routes/userRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import subCategoryRoutes from './routes/subCategoryRoutes.js';
 import productRoutes from './routes/productRoutes.js';
+import taxRoutes from './routes/taxRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import whyChooseUsRoutes from './routes/whyChooseUsRoutes.js';
 
@@ -35,7 +36,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/subcategories", subCategoryRoutes);
 app.use("/api/products", productRoutes);
-
+app.use('/api/taxes', taxRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/why-choose-us", whyChooseUsRoutes);
 

@@ -30,8 +30,6 @@ export default function Header() {
     const profileRef = useRef(null)
     const { user, logout } = useAuth();
 
-    console.log(user?.profileImage)
-
     // Close dropdowns on outside click
     useEffect(() => {
         const handleClickOutside = (event) => {

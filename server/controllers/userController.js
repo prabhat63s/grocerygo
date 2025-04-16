@@ -6,7 +6,7 @@ import path from 'path';
 
 // Register new user
 export const register = async (req, res) => {
-  const { email, password } = req.body;
+  const { name, email, mobile, password } = req.body;
 
   try {
     // Validate input
@@ -22,7 +22,7 @@ export const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = new User({ email, password: hashedPassword });
+    const user = new User({ name, email, mobile, password: hashedPassword });
     await user.save();
 
     const token = generateToken(user._id);
@@ -31,7 +31,9 @@ export const register = async (req, res) => {
       message: "User created successfully",
       user: {
         _id: user._id,
+        name: user.name,
         email: user.email,
+        mobile: user.mobile,
         role: user.role,
         profileImage: user.profileImage,
         token,
@@ -141,12 +143,6 @@ export const updateUserProfile = async (req, res) => {
     if (req.file && req.file.path) {
       const domainName = req.protocol + "://" + req.get("host");
       const newProfileImage = domainName + "/" + path.join("uploads", "users", req.file.filename).replace(/\\/g, "/");
-
-      // Optional: You could delete the old profile image if necessary
-      // if (user.profileImage) {
-      //   fs.unlinkSync(user.profileImage); // Requires fs (file system) module for file deletion
-      // }
-
       user.profileImage = newProfileImage;
     }
 

@@ -48,6 +48,21 @@ const variantSchema = new mongoose.Schema({
     }
 });
 
+const stockManagementSchema = new mongoose.Schema({
+    stockQty: {
+        type: Number
+    },
+    minOrderQty: {
+        type: Number
+    },
+    maxOrderQty: {
+        type: Number
+    },
+    lowQtyWarning: {
+        type: Number
+    },
+});
+
 const productSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -89,23 +104,12 @@ const productSchema = new mongoose.Schema({
     sellingPrice: {
         type: Number
     },
-    manageStock: {
+    stockManagement: {
         type: Boolean,
         default: false
     },
-    stockQty: {
-        type: Number
-    },
-    minOrderQty: {
-        type: Number
-    },
-    maxOrderQty: {
-        type: Number
-    },
-    lowQtyWarning: {
-        type: Number
-    },
-    images: [{
+    stock: [stockManagementSchema],
+    productImage: [{
         type: String
     }],
     tax: [{
