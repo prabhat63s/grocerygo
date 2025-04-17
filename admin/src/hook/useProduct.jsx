@@ -8,17 +8,13 @@ export const useProduct = () => {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [total, setTotal] = useState(0);
-    const [page, setPage] = useState(1);
 
-    const fetchAllProducts = async (page = 1) => {
+    const fetchAllProducts = async () => {
         setLoading(true);
         try {
-            const { data } = await axios.get(`${BASE_URL}?page=${page}`);
+            const { data } = await axios.get(`${BASE_URL}`);
             console.log('Fetched products:', data);
-            setProducts(data.products || []);
-            setTotal(data.total || 0);
-            setPage(data.page || 1);
+            setProducts(data.products);
         } catch (err) {
             console.error('Fetch error:', err);
             setError(err.response?.data?.message || "Error fetching products");
@@ -136,7 +132,5 @@ export const useProduct = () => {
         updateProduct,
         deleteProduct,
         searchProducts,
-        total,
-        page,
     };
 };

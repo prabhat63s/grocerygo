@@ -72,13 +72,10 @@ export const createProduct = async (req, res) => {
 // Get all products
 export const getAllProducts = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-    const products = await Product.find().populate("category").populate("subCategory").populate("tax").skip(skip).limit(limit);
+    const products = await Product.find().populate("category").populate("subCategory").populate("tax");
 
     const total = await Product.countDocuments();
-    res.json({ total, page, products });
+    res.json({ total, products });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });

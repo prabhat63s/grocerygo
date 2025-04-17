@@ -6,11 +6,11 @@ import { MdClose } from 'react-icons/md';
 import { useProduct } from '../../hook/useProduct';
 
 export default function Products() {
-  const { products, fetchAllProducts, loading, total, page } = useProduct();
+  const { products, fetchAllProducts, loading, } = useProduct();
 
 
   useEffect(() => {
-    fetchAllProducts(1);
+    fetchAllProducts();
   }, []);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,17 +27,11 @@ export default function Products() {
   const currentProducts = filteredProducts.slice(indexOfFirst, indexOfLast);
 
   const handleNext = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(prev => prev + 1);
-      fetchAllProducts(currentPage + 1);
-    }
+    if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
   };
 
   const handlePrev = () => {
-    if (currentPage > 1) {
-      setCurrentPage(prev => prev - 1);
-      fetchAllProducts(currentPage - 1);
-    }
+    if (currentPage > 1) setCurrentPage(prev => prev - 1);
   };
 
 
@@ -102,6 +96,7 @@ export default function Products() {
               <tbody>
                 {currentProducts.map((product, idx) => (
                   <tr
+                  key={idx}
                     className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
                   >
                     <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
@@ -188,7 +183,7 @@ export default function Products() {
 
           <div className="flex justify-between items-center text-sm text-gray-600 mt-4">
             <div>
-              Showing {products.length === 0 ? '0 to 0' : `${indexOfFirst + 1} to ${Math.min(indexOfLast, total)}`} of {total} entries
+            Showing {products.length === 0 ? '0 to 0' : `${indexOfFirst + 1} to ${Math.min(indexOfLast, filteredProducts.length)}`} of {filteredProducts.length} entries
             </div>
             <div className="space-x-2">
               <button
