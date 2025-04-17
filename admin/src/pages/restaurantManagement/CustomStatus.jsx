@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import CommonLayout from '../../components/layout/CommonLayout';
-import { FaArrowsAlt, FaCheck, FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { FaCheck, FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 export default function CustomStatus() {
@@ -40,18 +39,6 @@ export default function CustomStatus() {
         if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
     };
 
-    const handleDragEnd = (result) => {
-        if (!result.destination) return;
-
-        const updatedStatuses = [...customStatuses];
-        const sourceIndex = indexOfFirst + result.source.index;
-        const destinationIndex = indexOfFirst + result.destination.index;
-        const [removed] = updatedStatuses.splice(sourceIndex, 1);
-        updatedStatuses.splice(destinationIndex, 0, removed);
-
-        setCustomStatuses(updatedStatuses);
-    };
-
     return (
         <CommonLayout>
             <div className="flex flex-col gap-5 p-5">
@@ -84,66 +71,50 @@ export default function CustomStatus() {
                     </div>
 
                     <div className="overflow-x-auto mt-4">
-                        <DragDropContext onDragEnd={handleDragEnd}>
-                            <table className="min-w-full text-sm border border-gray-200 rounded-md">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="border px-4 py-2 text-left"></th>
-                                        <th className="border px-4 py-2 text-left">#</th>
-                                        <th className="border px-4 py-2 text-left">Order Type</th>
-                                        <th className="border px-4 py-2 text-left">Status Type</th>
-                                        <th className="border px-4 py-2 text-left">Name</th>
-                                        <th className="border px-4 py-2 text-left">Status</th>
-                                        <th className="border px-4 py-2 text-left">Created Date</th>
-                                        <th className="border px-4 py-2 text-left">Updated Date</th>
-                                        <th className="border px-4 py-2 text-left">Action</th>
+                        <table className="min-w-full text-sm border border-gray-200 rounded-md">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="border px-4 py-2 text-left">#</th>
+                                    <th className="border px-4 py-2 text-left">Order Type</th>
+                                    <th className="border px-4 py-2 text-left">Status Type</th>
+                                    <th className="border px-4 py-2 text-left">Name</th>
+                                    <th className="border px-4 py-2 text-left">Status</th>
+                                    <th className="border px-4 py-2 text-left">Created Date</th>
+                                    <th className="border px-4 py-2 text-left">Updated Date</th>
+                                    <th className="border px-4 py-2 text-left">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody >
+                                {currentStatuses.map((item, idx) => (
+                                    <tr
+                                        className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
+                                    >
+
+                                        <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
+                                        <td className="border px-4 py-2">{item.orderType}</td>
+                                        <td className="border px-4 py-2">{item.statusType}</td>
+                                        <td className="border px-4 py-2">{item.name}</td>
+                                        <td className="border px-4 py-2">
+                                            {item.status === "" ? <span className="bg-green-500 text-white text-xs inline-flex items-center justify-center p-1.5 rounded">
+                                                <FaCheck className="text-sm" />
+                                            </span> : "-"}
+                                        </td>
+                                        <td className="border px-4 py-2 md:w-32">{item.createdDate}</td>
+                                        <td className="border px-4 py-2 md:w-32">{item.updatedDate}</td>
+                                        <td className="border px-4 py-2 text-white">
+                                            <div className="flex items-center gap-2">
+                                                <button className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
+                                                    <FaEdit />
+                                                </button>
+                                                <button className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
+                                                    <FaTrash />
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <Droppable droppableId="customStatusTable">
-                                    {(provided) => (
-                                        <tbody ref={provided.innerRef} {...provided.droppableProps}>
-                                            {currentStatuses.map((item, idx) => (
-                                                <Draggable key={item.id} draggableId={item.id} index={idx}>
-                                                    {(provided) => (
-                                                        <tr
-                                                            ref={provided.innerRef}
-                                                            {...provided.draggableProps}
-                                                            className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
-                                                        >
-                                                            <td className="border px-4 py-2 text-gray-600 cursor-move" {...provided.dragHandleProps} title='Move'>
-                                                                <FaArrowsAlt />
-                                                            </td>
-                                                            <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
-                                                            <td className="border px-4 py-2">{item.orderType}</td>
-                                                            <td className="border px-4 py-2">{item.statusType}</td>
-                                                            <td className="border px-4 py-2">{item.name}</td>
-                                                            <td className="border px-4 py-2">
-                                                                {item.status === "" ? <span className="bg-green-500 text-white text-xs inline-flex items-center justify-center p-1.5 rounded">
-                                                                    <FaCheck className="text-sm" />
-                                                                </span> : "-"}
-                                                            </td>
-                                                            <td className="border px-4 py-2 md:w-32">{item.createdDate}</td>
-                                                            <td className="border px-4 py-2 md:w-32">{item.updatedDate}</td>
-                                                            <td className="border px-4 py-2 text-white">
-                                                                <div className="flex items-center gap-2">
-                                                                    <button className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
-                                                                        <FaEdit />
-                                                                    </button>
-                                                                    <button className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
-                                                                        <FaTrash />
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </Draggable>
-                                            ))}
-                                            {provided.placeholder}
-                                        </tbody>
-                                    )}
-                                </Droppable>
-                            </table>
-                        </DragDropContext>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
 
                     <div className="flex justify-between items-center mt-4 text-sm text-gray-600">

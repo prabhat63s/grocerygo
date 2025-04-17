@@ -4,7 +4,7 @@ import SubCategory from "../models/subCategoryModel.js";
 // Create a new subcategory
 export const createSubCategory = async (req, res) => {
     try {
-        let { name, category, status } = req.body;
+        let { name, category } = req.body;
 
         // Validate required fields
         if (!name || !category) {
@@ -19,7 +19,6 @@ export const createSubCategory = async (req, res) => {
         const newSubCategory = new SubCategory({
             name,
             category,
-            status
         });
 
         await newSubCategory.save();
@@ -50,6 +49,22 @@ export const getSubCategoryById = async (req, res) => {
         res.status(200).json(subCategory);
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+};
+
+// Toggle Category Status
+export const toggleSubCategoryStatus = async (req, res) => {
+    try {
+        const subCategory = await SubCategory.findById(req.params.id);
+        if (!subCategory) return res.status(404).json({ message: "subCategory not found" });
+
+        subCategory.status = !subCategory.status;
+        await subCategory.save();
+
+        res.status(200).json({ message: "subCategory status updated", status: subCategory.status });
+    } catch (err) {
+        console.error("Toggle Status Error:", err);
+        res.status(500).json({ message: "Server error" });
     }
 };
 

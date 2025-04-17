@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CommonLayout from '../../components/layout/CommonLayout';
-import { FaArrowsAlt, FaTrash } from 'react-icons/fa';
+import { FaTrash } from 'react-icons/fa';
 
 export default function Enquiries() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -72,7 +72,6 @@ export default function Enquiries() {
             <table className="min-w-full text-sm border border-gray-200 rounded-md">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="border px-4 py-2"></th>
                   <th className="border px-4 py-2">#</th>
                   <th className="border px-4 py-2">Name</th>
                   <th className="border px-4 py-2">Email</th>
@@ -86,7 +85,6 @@ export default function Enquiries() {
                 {currentEnquiries.length > 0 ? (
                   currentEnquiries.map((item, index) => (
                     <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border px-4 py-2 text-center cursor-move"><FaArrowsAlt /></td>
                       <td className="border px-4 py-2">{indexOfFirst + index + 1}</td>
                       <td className="border px-4 py-2">{item.name}</td>
                       <td className="border px-4 py-2">{item.email}</td>

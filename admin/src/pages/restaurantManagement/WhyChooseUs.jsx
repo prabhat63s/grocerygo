@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import CommonLayout from "../../components/layout/CommonLayout";
-import { FaArrowsAlt, FaEdit, FaPlus, FaTrash } from "react-icons/fa";
+import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 export default function WhyChooseUs() {
@@ -158,7 +158,6 @@ export default function WhyChooseUs() {
                         <table className="w-full text-sm text-left border rounded shadow bg-white">
                             <thead className="bg-gray-100 text-gray-700 font-semibold">
                                 <tr>
-                                    <th className="border px-4 py-2"></th>
                                     <th className="border px-4 py-2">#</th>
                                     <th className="border px-4 py-2">Image</th>
                                     <th className="border px-4 py-2">Title</th>
@@ -171,7 +170,6 @@ export default function WhyChooseUs() {
                             <tbody>
                                 {filtered.map((item, index) => (
                                     <tr key={item.id} className="border hover:bg-gray-50">
-                                        <td className="border px-4 py-2 text-center cursor-move"><FaArrowsAlt /></td>
                                         <td className="border px-4 py-2">{index + 1}</td>
                                         <td className="border px-4 py-2">
                                             <img

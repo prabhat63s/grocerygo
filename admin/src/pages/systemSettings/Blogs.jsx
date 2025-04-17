@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { FaEdit, FaTrash, FaArrowsAlt } from 'react-icons/fa';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { FaEdit, FaTrash, } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import CommonLayout from '../../components/layout/CommonLayout';
 
@@ -45,14 +44,6 @@ export default function Blogs() {
     }
   };
 
-  const handleDragEnd = (result) => {
-    if (!result.destination) return;
-    const reordered = Array.from(filteredBlogs);
-    const [moved] = reordered.splice(result.source.index, 1);
-    reordered.splice(result.destination.index, 0, moved);
-    setBlogs(reordered); // Save full reordered list
-  };
-
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
@@ -93,66 +84,48 @@ export default function Blogs() {
             </div>
           </div>
 
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="blogList">
-              {(provided) => (
-                <table className="min-w-full border text-sm" ref={provided.innerRef} {...provided.droppableProps}>
-                  <thead className="bg-gray-100 font-semibold">
-                    <tr>
-                      <th className="border px-3 py-2 w-10"></th>
-                      <th className="border px-3 py-2 w-8">#</th>
-                      <th className="border px-3 py-2 w-24">Image</th>
-                      <th className="border px-3 py-2">Title</th>
-                      <th className="border px-3 py-2">Description</th>
-                      <th className="border px-3 py-2">Created Date</th>
-                      <th className="border px-3 py-2">Updated Date</th>
-                      <th className="border px-3 py-2 w-24">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentItems.map((blog, index) => (
-                      <Draggable key={blog.id} draggableId={blog.id} index={startIndex + index}>
-                        {(provided) => (
-                          <tr
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
-                          >
-                            <td className="border px-3 py-2 text-gray-500 cursor-move" {...provided.dragHandleProps}>
-                              <FaArrowsAlt />
-                            </td>
-                            <td className="border px-3 py-2">{startIndex + index + 1}</td>
-                            <td className="border px-3 py-2">
-                              <img src={blog.image} alt="Blog" className="h-12 w-auto rounded" />
-                            </td>
-                            <td className="border px-3 py-2">{blog.title}</td>
-                            <td className="border px-3 py-2 truncate max-w-sm">{blog.description}</td>
-                            <td className="border px-3 py-2">{blog.created}</td>
-                            <td className="border px-3 py-2">{blog.updated}</td>
-                            <td className="border px-3 py-2">
-                              <div className="flex gap-2">
-                                <Link to={`/blogs/${blog.id}`} className="p-1.5 bg-blue-500 text-white rounded hover:bg-blue-600">
-                                  <FaEdit />
-                                </Link>
-                                <button
-                                  onClick={() => handleDelete(blog.id)}
-                                  className="p-1.5 bg-red-500 text-white rounded hover:bg-red-600"
-                                >
-                                  <FaTrash />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </tbody>
-                </table>
-              )}
-            </Droppable>
-          </DragDropContext>
-
+          <table className="min-w-full border text-sm">
+            <thead className="bg-gray-100 font-semibold">
+              <tr>
+                <th className="border px-3 py-2 w-8">#</th>
+                <th className="border px-3 py-2 w-24">Image</th>
+                <th className="border px-3 py-2">Title</th>
+                <th className="border px-3 py-2">Description</th>
+                <th className="border px-3 py-2">Created Date</th>
+                <th className="border px-3 py-2">Updated Date</th>
+                <th className="border px-3 py-2 w-24">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentItems.map((blog, index) => (
+                <tr
+                  className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
+                >
+                  <td className="border px-3 py-2">{startIndex + index + 1}</td>
+                  <td className="border px-3 py-2">
+                    <img src={blog.image} alt="Blog" className="h-12 w-auto rounded" />
+                  </td>
+                  <td className="border px-3 py-2">{blog.title}</td>
+                  <td className="border px-3 py-2 truncate max-w-sm">{blog.description}</td>
+                  <td className="border px-3 py-2">{blog.created}</td>
+                  <td className="border px-3 py-2">{blog.updated}</td>
+                  <td className="border px-3 py-2">
+                    <div className="flex gap-2">
+                      <Link to={`/blogs/${blog.id}`} className="p-1.5 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        <FaEdit />
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(blog.id)}
+                        className="p-1.5 bg-red-500 text-white rounded hover:bg-red-600"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
           <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
             <div>
               Showing {filteredBlogs.length === 0 ? '0 to 0' : `${startIndex + 1} to ${Math.min(endIndex, filteredBlogs.length)}`} of {filteredBlogs.length} entries

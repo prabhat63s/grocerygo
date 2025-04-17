@@ -5,6 +5,7 @@ import {
     getCategoryById,
     updateCategory,
     deleteCategory,
+    toggleCategoryStatus,
 } from "../controllers/categoryController.js";
 import { isAdmin, protect } from "../middleware/authMiddleware.js";
 import { uploadImage } from "../middleware/uploadImage.js";
@@ -19,6 +20,9 @@ router.get("/", getCategories);
 
 // get single category by ID
 router.get("/:id", getCategoryById);
+
+// toggle category status
+router.patch("/:id/toggle-status", toggleCategoryStatus);
 
 // update a category
 router.put("/:id", protect, isAdmin, uploadImage.single("categoryImage"), updateCategory);

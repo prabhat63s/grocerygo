@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import CommonLayout from '../../components/layout/CommonLayout';
-import { FaPlus, FaTrash, FaEdit, FaCheck, FaEye, FaArrowsAlt } from 'react-icons/fa';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { FaPlus, FaTrash, FaEdit, FaCheck, FaEye } from 'react-icons/fa';
 
 export default function EmployeeList() {
     const initialEmployees = [
@@ -41,16 +40,6 @@ export default function EmployeeList() {
         if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
     };
 
-    const handleDragEnd = (result) => {
-        if (!result.destination) return;
-        const updated = [...employees];
-        const sourceIndex = indexOfFirst + result.source.index;
-        const destinationIndex = indexOfFirst + result.destination.index;
-        const [removed] = updated.splice(sourceIndex, 1);
-        updated.splice(destinationIndex, 0, removed);
-        setEmployees(updated);
-    };
-
     return (
         <CommonLayout>
             <div className="flex flex-col gap-5 p-5">
@@ -83,83 +72,66 @@ export default function EmployeeList() {
                     </div>
 
                     <div className="overflow-x-auto">
-                        <DragDropContext onDragEnd={handleDragEnd}>
-                            <table className="min-w-full text-sm border border-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="border px-3 py-2"></th>
-                                        <th className="border px-3 py-2 text-left">#</th>
-                                        <th className="border px-3 py-2 text-left">Image</th>
-                                        <th className="border px-3 py-2 text-left">Role</th>
-                                        <th className="border px-3 py-2 text-left">Name</th>
-                                        <th className="border px-3 py-2 text-left">Email</th>
-                                        <th className="border px-3 py-2 text-left">Mobile</th>
-                                        <th className="border px-3 py-2 text-left">Status</th>
-                                        <th className="border px-3 py-2 text-left">Created Date</th>
-                                        <th className="border px-3 py-2 text-left">Updated Date</th>
-                                        <th className="border px-3 py-2 text-left">Action</th>
+                        <table className="min-w-full text-sm border border-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="border px-3 py-2 text-left">#</th>
+                                    <th className="border px-3 py-2 text-left">Image</th>
+                                    <th className="border px-3 py-2 text-left">Role</th>
+                                    <th className="border px-3 py-2 text-left">Name</th>
+                                    <th className="border px-3 py-2 text-left">Email</th>
+                                    <th className="border px-3 py-2 text-left">Mobile</th>
+                                    <th className="border px-3 py-2 text-left">Status</th>
+                                    <th className="border px-3 py-2 text-left">Created Date</th>
+                                    <th className="border px-3 py-2 text-left">Updated Date</th>
+                                    <th className="border px-3 py-2 text-left">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentEmployees.map((emp, idx) => (
+                                    <tr
+                                        className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-gray-100'}
+                                    >
+                                        <td className="border px-3 py-2">{indexOfFirst + idx + 1}</td>
+                                        <td className="border px-3 py-2">
+                                            {emp.image ? (
+                                                <img src={emp.image} alt="Employee" className="h-10 w-10 rounded-full object-cover" />
+                                            ) : (
+                                                <div className="h-10 w-10 bg-gray-300 rounded-full" />
+                                            )}
+                                        </td>
+                                        <td className="border px-3 py-2">{emp.role}</td>
+                                        <td className="border px-3 py-2">{emp.name}</td>
+                                        <td className="border px-3 py-2">{emp.email}</td>
+                                        <td className="border px-3 py-2">{emp.mobile}</td>
+                                        <td className="border px-3 py-2">
+                                            {emp.status === 'Active' ? (
+                                                <span className="bg-green-500 text-white text-xs p-1.5 rounded inline-flex items-center">
+                                                    <FaCheck className="text-sm" />
+                                                </span>
+                                            ) : (
+                                                '-'
+                                            )}
+                                        </td>
+                                        <td className="border px-3 py-2">{emp.createdDate}</td>
+                                        <td className="border px-3 py-2">{emp.updatedDate}</td>
+                                        <td className="border px-3 py-2">
+                                            <div className="flex gap-2">
+                                                <Link to={`/admin/employees/edit/${emp.id}`} className="bg-blue-500 text-white p-1.5 rounded hover:bg-blue-600" title="Edit">
+                                                    <FaEdit />
+                                                </Link>
+                                                <Link to={`/admin/employees/view/${emp.id}`} className="bg-black text-white p-1.5 rounded hover:bg-neutral-700" title="View">
+                                                    <FaEye />
+                                                </Link>
+                                                <button className="bg-red-500 text-white p-1.5 rounded hover:bg-red-600" title="Delete">
+                                                    <FaTrash />
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <Droppable droppableId="employeeTable">
-                                    {(provided) => (
-                                        <tbody ref={provided.innerRef} {...provided.droppableProps}>
-                                            {currentEmployees.map((emp, idx) => (
-                                                <Draggable key={emp.id} draggableId={emp.id} index={idx}>
-                                                    {(provided) => (
-                                                        <tr
-                                                            ref={provided.innerRef}
-                                                            {...provided.draggableProps}
-                                                            className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-gray-100'}
-                                                        >
-                                                            <td className="border px-3 py-2" {...provided.dragHandleProps}>
-                                                                <FaArrowsAlt className="text-gray-500" />
-                                                            </td>
-                                                            <td className="border px-3 py-2">{indexOfFirst + idx + 1}</td>
-                                                            <td className="border px-3 py-2">
-                                                                {emp.image ? (
-                                                                    <img src={emp.image} alt="Employee" className="h-10 w-10 rounded-full object-cover" />
-                                                                ) : (
-                                                                    <div className="h-10 w-10 bg-gray-300 rounded-full" />
-                                                                )}
-                                                            </td>
-                                                            <td className="border px-3 py-2">{emp.role}</td>
-                                                            <td className="border px-3 py-2">{emp.name}</td>
-                                                            <td className="border px-3 py-2">{emp.email}</td>
-                                                            <td className="border px-3 py-2">{emp.mobile}</td>
-                                                            <td className="border px-3 py-2">
-                                                                {emp.status === 'Active' ? (
-                                                                    <span className="bg-green-500 text-white text-xs p-1.5 rounded inline-flex items-center">
-                                                                        <FaCheck className="text-sm" />
-                                                                    </span>
-                                                                ) : (
-                                                                    '-'
-                                                                )}
-                                                            </td>
-                                                            <td className="border px-3 py-2">{emp.createdDate}</td>
-                                                            <td className="border px-3 py-2">{emp.updatedDate}</td>
-                                                            <td className="border px-3 py-2">
-                                                                <div className="flex gap-2">
-                                                                    <Link to={`/admin/employees/edit/${emp.id}`} className="bg-blue-500 text-white p-1.5 rounded hover:bg-blue-600" title="Edit">
-                                                                        <FaEdit />
-                                                                    </Link>
-                                                                    <Link to={`/admin/employees/view/${emp.id}`} className="bg-black text-white p-1.5 rounded hover:bg-neutral-700" title="View">
-                                                                        <FaEye />
-                                                                    </Link>
-                                                                    <button className="bg-red-500 text-white p-1.5 rounded hover:bg-red-600" title="Delete">
-                                                                        <FaTrash />
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </Draggable>
-                                            ))}
-                                            {provided.placeholder}
-                                        </tbody>
-                                    )}
-                                </Droppable>
-                            </table>
-                        </DragDropContext>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
 
                     <div className="flex justify-between items-center mt-4 text-sm text-gray-600">

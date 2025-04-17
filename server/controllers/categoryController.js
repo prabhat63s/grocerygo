@@ -43,6 +43,22 @@ export const getCategoryById = async (req, res) => {
     }
 };
 
+// Toggle Category Status
+export const toggleCategoryStatus = async (req, res) => {
+    try {
+        const category = await Category.findById(req.params.id);
+        if (!category) return res.status(404).json({ message: "Category not found" });
+
+        category.status = !category.status;
+        await category.save();
+
+        res.status(200).json({ message: "Category status updated", status: category.status });
+    } catch (err) {
+        console.error("Toggle Status Error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
 // Update Category
 export const updateCategory = async (req, res) => {
     try {

@@ -9,7 +9,7 @@ export default function ProductReviews() {
   return (
     <CommonLayout>
       <div className="p-5 space-y-5">
-<div className="flex justify-between md:flex-row flex-col gap-3 md:items-center">
+        <div className="flex justify-between md:flex-row flex-col gap-3 md:items-center">
           <h1 className="text-2xl font-semibold">Product Reviews</h1>
         </div>
 

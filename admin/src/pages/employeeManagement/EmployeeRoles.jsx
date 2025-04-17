@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import CommonLayout from '../../components/layout/CommonLayout';
-import { FaArrowsAlt, FaCheck, FaEdit, FaEye, FaPlus, FaTrash } from 'react-icons/fa';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { FaCheck, FaEdit, FaEye, FaPlus, FaTrash } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 export default function EmployeeRoles() {
@@ -49,18 +48,6 @@ export default function EmployeeRoles() {
         if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
     };
 
-    const handleDragEnd = (result) => {
-        if (!result.destination) return;
-
-        const updated = [...roles];
-        const sourceIndex = indexOfFirst + result.source.index;
-        const destinationIndex = indexOfFirst + result.destination.index;
-        const [removed] = updated.splice(sourceIndex, 1);
-        updated.splice(destinationIndex, 0, removed);
-
-        setRoles(updated);
-    };
-
     return (
         <CommonLayout>
             <div className="flex flex-col gap-5 p-5">
@@ -93,77 +80,60 @@ export default function EmployeeRoles() {
                     </div>
 
                     <div className="overflow-x-auto">
-                        <DragDropContext onDragEnd={handleDragEnd}>
-                            <table className="min-w-full text-sm border border-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="border px-4 py-2"></th>
-                                        <th className="border px-4 py-2 text-left">#</th>
-                                        <th className="border px-4 py-2 text-left">Role Name</th>
-                                        <th className="border px-4 py-2 text-left">System Modules</th>
-                                        <th className="border px-4 py-2 text-left">Status</th>
-                                        <th className="border px-4 py-2 text-left">Created Date</th>
-                                        <th className="border px-4 py-2 text-left">Updated Date</th>
-                                        <th className="border px-4 py-2 text-left">Action</th>
+                        <table className="min-w-full text-sm border border-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="border px-4 py-2 text-left">#</th>
+                                    <th className="border px-4 py-2 text-left">Role Name</th>
+                                    <th className="border px-4 py-2 text-left">System Modules</th>
+                                    <th className="border px-4 py-2 text-left">Status</th>
+                                    <th className="border px-4 py-2 text-left">Created Date</th>
+                                    <th className="border px-4 py-2 text-left">Updated Date</th>
+                                    <th className="border px-4 py-2 text-left">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentRoles.map((role, idx) => (
+                                    <tr
+                                        className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
+                                    >
+                                        <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
+                                        <td className="border px-4 py-2">{role.roleName}</td>
+                                        <td className="border px-4 py-2 whitespace-normal">
+                                            <div className="flex flex-wrap gap-1">
+                                                {role.modules.map((mod, i) => (
+                                                    <span key={i} className="bg-gray-200 px-2 py-1 rounded text-xs text-gray-700">
+                                                        {mod}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            {role.status === 'Active' ? (
+                                                <span className="bg-green-500 text-white text-xs p-1.5 rounded inline-flex items-center">
+                                                    <FaCheck className="text-sm" />
+                                                </span>
+                                            ) : '-'}
+                                        </td>
+                                        <td className="border px-4 py-2">{role.createdDate}</td>
+                                        <td className="border px-4 py-2">{role.updatedDate}</td>
+                                        <td className="border px-4 py-2">
+                                            <div className="flex gap-2">
+                                                <Link to={`/admin/roles/edit/${role.id}`} className="bg-blue-500 text-white p-1.5 rounded hover:bg-blue-600" title="Edit">
+                                                    <FaEdit />
+                                                </Link>
+                                                <Link to={`/admin/roles/view/${role.id}`} className="bg-black text-white p-1.5 rounded hover:bg-neutral-700" title="View">
+                                                    <FaEye />
+                                                </Link>
+                                                <button className="bg-red-500 text-white p-1.5 rounded hover:bg-red-600" title="Delete">
+                                                    <FaTrash />
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <Droppable droppableId="rolesTable">
-                                    {(provided) => (
-                                        <tbody ref={provided.innerRef} {...provided.droppableProps}>
-                                            {currentRoles.map((role, idx) => (
-                                                <Draggable key={role.id} draggableId={role.id} index={idx}>
-                                                    {(provided) => (
-                                                        <tr
-                                                            ref={provided.innerRef}
-                                                            {...provided.draggableProps}
-                                                            className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
-                                                        >
-                                                            <td className="border px-4 py-2" {...provided.dragHandleProps}>
-                                                                <FaArrowsAlt className="text-gray-500 cursor-move" />
-                                                            </td>
-                                                            <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
-                                                            <td className="border px-4 py-2">{role.roleName}</td>
-                                                            <td className="border px-4 py-2 whitespace-normal">
-                                                                <div className="flex flex-wrap gap-1">
-                                                                    {role.modules.map((mod, i) => (
-                                                                        <span key={i} className="bg-gray-200 px-2 py-1 rounded text-xs text-gray-700">
-                                                                            {mod}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                            </td>
-                                                            <td className="border px-4 py-2">
-                                                                {role.status === 'Active' ? (
-                                                                    <span className="bg-green-500 text-white text-xs p-1.5 rounded inline-flex items-center">
-                                                                        <FaCheck className="text-sm" />
-                                                                    </span>
-                                                                ) : '-'}
-                                                            </td>
-                                                            <td className="border px-4 py-2">{role.createdDate}</td>
-                                                            <td className="border px-4 py-2">{role.updatedDate}</td>
-                                                            <td className="border px-4 py-2">
-                                                                <div className="flex gap-2">
-                                                                    <Link to={`/admin/roles/edit/${role.id}`} className="bg-blue-500 text-white p-1.5 rounded hover:bg-blue-600" title="Edit">
-                                                                        <FaEdit />
-                                                                    </Link>
-                                                                    <Link to={`/admin/roles/view/${role.id}`} className="bg-black text-white p-1.5 rounded hover:bg-neutral-700" title="View">
-                                                                        <FaEye />
-                                                                    </Link>
-                                                                    <button className="bg-red-500 text-white p-1.5 rounded hover:bg-red-600" title="Delete">
-                                                                        <FaTrash />
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </Draggable>
-                                            ))}
-                                            {provided.placeholder}
-                                        </tbody>
-                                    )}
-                                </Droppable>
-                            </table>
-                        </DragDropContext>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
 
                     <div className="flex justify-between items-center text-sm text-gray-600">

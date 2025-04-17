@@ -113,7 +113,7 @@ export default function PosOrder() {
                       </td>
                       <td className="border px-4 py-2">{order.orderType}</td>
                       <td className="border px-4 py-2">
-                        <span className={`text-xs font-medium px-2 py-1 rounded-full 
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full
                           ${order.status === "Cancel"
                             ? "bg-red-100 text-red-700"
                             : order.status === "Complete"

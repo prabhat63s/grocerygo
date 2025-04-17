@@ -16,6 +16,10 @@ const taxSchema = new mongoose.Schema({
     required: true,
     min: 0
   },
+  status: {
+    type: Boolean,
+    default: true,
+}
 }, { timestamps: true });
 
 const Tax = mongoose.model('Tax', taxSchema);

@@ -1,8 +1,7 @@
 import { useState } from "react";
 import CommonLayout from '../../components/layout/CommonLayout'
 import Select from "react-select";
-import { FaEdit, FaTrash, FaArrowsAlt, FaCheck } from "react-icons/fa";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { FaEdit, FaTrash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 
@@ -69,24 +68,6 @@ export default function TopDeal() {
 
     const handleNext = () => {
         if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
-    };
-
-    // When dragging, use the offset based on pagination to compute the full list indices.
-    const handleDragEnd = (result) => {
-        if (!result.destination) return;
-
-        // Copy the full categories list
-        const updatedCategories = [...sliders];
-        // Compute the "real" source and destination indices in the full list
-        const sourceIndex = indexOfFirst + result.source.index;
-        const destinationIndex = indexOfFirst + result.destination.index;
-
-        // Remove the dragged item from its original position
-        const [removed] = updatedCategories.splice(sourceIndex, 1);
-        // Insert it at the new position
-        updatedCategories.splice(destinationIndex, 0, removed);
-
-        setSliders(updatedCategories);
     };
 
     return (
@@ -260,57 +241,40 @@ export default function TopDeal() {
                     </div>
 
                     <div className="overflow-x-auto mt-4">
-                        <DragDropContext onDragEnd={handleDragEnd}>
-                            <table className="min-w-full text-sm border border-gray-200 rounded-md">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="border px-4 py-2 text-left"></th>
-                                        <th className="border px-4 py-2 text-left">#</th>
-                                        <th className="border px-4 py-2 text-left">Products</th>
-                                        <th className="border px-4 py-2 text-left">Created Date</th>
-                                        <th className="border px-4 py-2 text-left">Updated Date</th>
-                                        <th className="border px-4 py-2 text-left">Action</th>
+                        <table className="min-w-full text-sm border border-gray-200 rounded-md">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="border px-4 py-2 text-left">#</th>
+                                    <th className="border px-4 py-2 text-left">Products</th>
+                                    <th className="border px-4 py-2 text-left">Created Date</th>
+                                    <th className="border px-4 py-2 text-left">Updated Date</th>
+                                    <th className="border px-4 py-2 text-left">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody
+                            >
+                                {currentSliders.map((slider, idx) => (
+                                    <tr
+                                        className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
+                                    >
+                                        <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
+                                        <td className="border px-4 py-2">{slider.product}</td>
+                                        <td className="border px-4 py-2">{slider.created}</td>
+                                        <td className="border px-4 py-2">{slider.updated}</td>
+                                        <td className="border px-4 py-2 text-white">
+                                            <div className="flex items-center gap-2">
+                                                <Link to={`/admin/slider-${slider.id}`} className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
+                                                    <FaEdit />
+                                                </Link>
+                                                <button className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
+                                                    <FaTrash />
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <Droppable droppableId="slider-table" direction="vertical">
-                                    {(provided) => (
-                                        <tbody
-                                            ref={provided.innerRef}
-                                            {...provided.droppableProps}
-                                        >
-                                            {currentSliders.map((slider, idx) => (
-                                                <Draggable key={slider.id} draggableId={slider.id} index={idx}>
-                                                    {(provided) => (
-                                                        <tr
-                                                            ref={provided.innerRef}
-                                                            {...provided.draggableProps}
-                                                            className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
-                                                        >
-                                                            <td className="border px-4 py-2 text-gray-600 cursor-move" {...provided.dragHandleProps} title='Move'><FaArrowsAlt /></td>
-                                                            <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
-                                                            <td className="border px-4 py-2">{slider.product}</td>
-                                                            <td className="border px-4 py-2">{slider.created}</td>
-                                                            <td className="border px-4 py-2">{slider.updated}</td>
-                                                            <td className="border px-4 py-2 text-white">
-                                                                <div className="flex items-center gap-2">
-                                                                    <Link to={`/admin/slider-${slider.id}`} className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
-                                                                        <FaEdit />
-                                                                    </Link>
-                                                                    <button className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
-                                                                        <FaTrash />
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </Draggable>
-                                            ))}
-                                            {provided.placeholder}
-                                        </tbody>
-                                    )}
-                                </Droppable>
-                            </table>
-                        </DragDropContext>
+                                ))}
+                            </tbody>
+                        </table>
 
                     </div>
 

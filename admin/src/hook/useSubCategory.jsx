@@ -68,6 +68,16 @@ const useSubCategory = () => {
     }
   };
 
+  // toggle status of a subCategory
+  const handleToggleStatus = async (id) => {
+    try {
+      await axios.patch(`${import.meta.env.VITE_BASE_URL}/subcategories/${id}/toggle-status`);
+
+      fetchSubCategories();
+    } catch (err) {
+      console.error("Status toggle failed:", err);
+    }
+  };
 
   // delete a subcategory
   const deleteSubCategory = async (id) => {
@@ -130,6 +140,7 @@ const useSubCategory = () => {
     subCategory,
     fetchSubCategories,
     fetchSubCategoryById,
+    handleToggleStatus,
     updateSubCategory,
     deleteSubCategory,
     createSubCategory,

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaTrash, FaUpDownLeftRight } from 'react-icons/fa6';
+import { FaTrash } from 'react-icons/fa6';
 import { FaEdit } from 'react-icons/fa';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import CommonLayout from '../../components/layout/CommonLayout';
 
 export default function FAQs() {
@@ -39,14 +38,6 @@ export default function FAQs() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const currentFaqs = filteredFaqs.slice(startIndex, endIndex);
-
-    const handleDragEnd = (result) => {
-        if (!result.destination) return;
-        const reordered = Array.from(faqs);
-        const [moved] = reordered.splice(result.source.index, 1);
-        reordered.splice(result.destination.index, 0, moved);
-        setFaqs(reordered);
-    };
 
     return (
         <CommonLayout>
@@ -87,71 +78,49 @@ export default function FAQs() {
                     </div>
 
                     <div className="overflow-x-auto">
-                        <DragDropContext onDragEnd={handleDragEnd}>
-                            <Droppable droppableId="faqTable">
-                                {(provided) => (
-                                    <table
-                                        ref={provided.innerRef}
-                                        {...provided.droppableProps}
-                                        className="min-w-full text-sm border rounded"
+                        <table
+                            className="min-w-full text-sm border rounded"
+                        >
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="border px-3 py-2">#</th>
+                                    <th className="border px-3 py-2">Title</th>
+                                    <th className="border px-3 py-2">Description</th>
+                                    <th className="border px-3 py-2">Created Date</th>
+                                    <th className="border px-3 py-2">Updated Date</th>
+                                    <th className="border px-3 py-2">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentFaqs.map((faq, idx) => (
+                                    <tr
+                                        className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
                                     >
-                                        <thead className="bg-gray-50">
-                                            <tr>
-                                                <th className="border px-3 py-2"></th>
-                                                <th className="border px-3 py-2">#</th>
-                                                <th className="border px-3 py-2">Title</th>
-                                                <th className="border px-3 py-2">Description</th>
-                                                <th className="border px-3 py-2">Created Date</th>
-                                                <th className="border px-3 py-2">Updated Date</th>
-                                                <th className="border px-3 py-2">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {currentFaqs.map((faq, idx) => (
-                                                <Draggable key={faq.id} draggableId={faq.id} index={startIndex + idx}>
-                                                    {(provided) => (
-                                                        <tr
-                                                            ref={provided.innerRef}
-                                                            {...provided.draggableProps}
-                                                            className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
-                                                        >
-                                                            <td
-                                                                {...provided.dragHandleProps}
-                                                                className="border px-3 py-2 text-gray-500"
-                                                            >
-                                                                <FaUpDownLeftRight />
-                                                            </td>
-                                                            <td className="border px-3 py-2">{startIndex + idx + 1}</td>
-                                                            <td className="border px-3 py-2">{faq.title}</td>
-                                                            <td className="border px-3 py-2">{faq.description}</td>
-                                                            <td className="border px-3 py-2">{faq.createdAt}</td>
-                                                            <td className="border px-3 py-2">{faq.updatedAt}</td>
-                                                            <td className="border px-3 py-2">
-                                                                <div className="flex gap-2 text-white">
-                                                                    <Link
-                                                                        to={`/faq/${faq.id}`}
-                                                                        className="bg-blue-600 p-1.5 rounded-md hover:bg-blue-800"
-                                                                    >
-                                                                        <FaEdit />
-                                                                    </Link>
-                                                                    <button
-                                                                        onClick={() => alert('Delete clicked')}
-                                                                        className="bg-red-500 p-1.5 rounded-md hover:bg-red-700"
-                                                                    >
-                                                                        <FaTrash />
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </Draggable>
-                                            ))}
-                                            {provided.placeholder}
-                                        </tbody>
-                                    </table>
-                                )}
-                            </Droppable>
-                        </DragDropContext>
+                                        <td className="border px-3 py-2">{startIndex + idx + 1}</td>
+                                        <td className="border px-3 py-2">{faq.title}</td>
+                                        <td className="border px-3 py-2">{faq.description}</td>
+                                        <td className="border px-3 py-2">{faq.createdAt}</td>
+                                        <td className="border px-3 py-2">{faq.updatedAt}</td>
+                                        <td className="border px-3 py-2">
+                                            <div className="flex gap-2 text-white">
+                                                <Link
+                                                    to={`/faq/${faq.id}`}
+                                                    className="bg-blue-600 p-1.5 rounded-md hover:bg-blue-800"
+                                                >
+                                                    <FaEdit />
+                                                </Link>
+                                                <button
+                                                    onClick={() => alert('Delete clicked')}
+                                                    className="bg-red-500 p-1.5 rounded-md hover:bg-red-700"
+                                                >
+                                                    <FaTrash />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
 
                     <div className="flex justify-between items-center mt-4 text-sm text-gray-600">

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Product from "../models/productModel.js";
 
 // Create product
@@ -33,11 +34,18 @@ export const createProduct = async (req, res) => {
       return res.status(400).json({ message: "Product already exists" });
     }
 
+    // Convert category to ObjectId if it's a string
+    let parsedCategory = category;
+    if (typeof category === "string") {
+      parsedCategory = new mongoose.Types.ObjectId(category);
+    }
+
+
     const product = new Product({
       name: normalizedName,
       sku,
       videoURL,
-      category,
+      category: parsedCategory,
       subCategory,
       type,
       hasExtras,
@@ -64,8 +72,13 @@ export const createProduct = async (req, res) => {
 // Get all products
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate("category").populate("subCategory").populate("tax");
-    res.json(products);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const products = await Product.find().populate("category").populate("subCategory").populate("tax").skip(skip).limit(limit);
+
+    const total = await Product.countDocuments();
+    res.json({ total, page, products });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
@@ -91,7 +104,7 @@ export const updateProduct = async (req, res) => {
     const {
       name, sku, videoURL, category, subCategory, type,
       hasExtras, extras, hasVariants, variants,
-      originalPrice, sellingPrice, stockManagement, stock, description, tax, productImage
+      originalPrice, sellingPrice, stockManagement, stock, description, tax,
     } = req.body;
 
     // Parse JSON data for extras, variants, and stockManagement
@@ -130,11 +143,17 @@ export const updateProduct = async (req, res) => {
     product.tax = parsedTax.length > 0 ? parsedTax : product.tax;
 
     // Handle image updates (optional, only update if new images are provided)
-    if (productImage) {
+    // if (productImage) {
+    //   const domainName = req.protocol + "://" + req.get("host");
+    //   const updatedImages = req.files?.map(file => `${domainName}/uploads/products/${file.filename}`) || [];
+    //   product.productImage = updatedImages.length > 0 ? updatedImages : product.productImage;
+    // }
+    if (req.files && req.files.length > 0) {
       const domainName = req.protocol + "://" + req.get("host");
-      const updatedImages = req.files?.map(file => `${domainName}/uploads/products/${file.filename}`) || [];
-      product.productImage = updatedImages.length > 0 ? updatedImages : product.productImage;
+      const updatedImages = req.files.map(file => `${domainName}/uploads/products/${file.filename}`);
+      product.productImage = updatedImages;
     }
+
 
     // Save the updated product
     await product.save();
@@ -163,7 +182,7 @@ export const deleteProduct = async (req, res) => {
 // Get products by category
 export const getProductsByCategory = async (req, res) => {
   try {
-    const products = await Product.find({ category: req.params.categoryId });
+    const products = await Product.find().populate("category").lean();
     res.json(products);
   } catch (error) {
     console.error(error);
@@ -187,8 +206,13 @@ export const getProductsBySearchQuery = async (req, res) => {
   try {
     const { query } = req.query;
     const products = await Product.find({
-      name: { $regex: query, $options: "i" }
+      $or: [
+        { name: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } },
+        { sku: { $regex: query, $options: "i" } }
+      ]
     });
+
     res.json(products);
   } catch (error) {
     console.error(error);
@@ -199,7 +223,10 @@ export const getProductsBySearchQuery = async (req, res) => {
 // Recently added products
 export const getRecentlyAddedProducts = async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 }).limit(10);
+    const sort = req.query.sort || 'createdAt';
+    const order = req.query.order === 'asc' ? 1 : -1;
+
+    const products = await Product.find().sort({ [sort]: order }).limit(10);
     res.json(products);
   } catch (error) {
     console.error(error);

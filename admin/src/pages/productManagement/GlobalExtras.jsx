@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CommonLayout from '../../components/layout/CommonLayout';
-import { FaArrowsAlt, FaCheck, FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
+import { FaCheck, FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Link } from 'react-router-dom';
 
@@ -48,7 +48,6 @@ export default function GlobalExtras() {
     }
   ];
 
-
   const [extras, setExtras] = useState(initialExtras);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -71,17 +70,6 @@ export default function GlobalExtras() {
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
-  };
-
-  // Drag and drop: update the full list based on pagination offset
-  const handleDragEnd = (result) => {
-    if (!result.destination) return;
-    const updatedTaxes = [...extras];
-    const sourceIndex = indexOfFirst + result.source.index;
-    const destinationIndex = indexOfFirst + result.destination.index;
-    const [removed] = updatedTaxes.splice(sourceIndex, 1);
-    updatedTaxes.splice(destinationIndex, 0, removed);
-    setExtras(updatedTaxes);
   };
 
   return (
@@ -119,71 +107,54 @@ export default function GlobalExtras() {
           </div>
 
           <div className="overflow-x-auto mt-4">
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <table className="min-w-full text-sm border border-gray-200 rounded-md">
-                <thead className="bg-gray-100 text-left text-sm font-medium">
-                  <tr>
-                    <th className="border px-4 py-2"></th>
-                    <th className="border px-4 py-2">#</th>
-                    <th className="border px-4 py-2">Name</th>
-                    <th className="border px-4 py-2">Price</th>
-                    <th className="border px-4 py-2">Status</th>
-                    <th className="border px-4 py-2">Created Date</th>
-                    <th className="border px-4 py-2">Updated Date</th>
-                    <th className="border px-4 py-2">Actions</th>
+            <table className="min-w-full text-sm border border-gray-200 rounded-md">
+              <thead className="bg-gray-100 text-left text-sm font-medium">
+                <tr>
+                  <th className="border px-4 py-2">#</th>
+                  <th className="border px-4 py-2">Name</th>
+                  <th className="border px-4 py-2">Price</th>
+                  <th className="border px-4 py-2">Status</th>
+                  <th className="border px-4 py-2">Created Date</th>
+                  <th className="border px-4 py-2">Updated Date</th>
+                  <th className="border px-4 py-2">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {currentTaxes.map((tax, idx) => (
+
+                  <tr
+                    className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                  >
+                    <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
+                    <td className="border px-4 py-2">{tax.name}</td>
+                    <td className="border px-4 py-2">{tax.price}</td>
+                    <td className="border px-4 py-2">
+                      <span
+                        className={`text-white p-1.5 text-xs rounded-md inline-block ${tax.status === "active" ? "bg-green-500" : "bg-gray-400"
+                          }`}
+                      >
+                        {tax.status === "active" ? <FaCheck /> : ""}
+                      </span>
+                    </td>
+                    <td className="border px-4 py-2 md:w-32">{tax.createdDate}</td>
+                    <td className="border px-4 py-2 md:w-32">{tax.updatedDate}</td>
+                    <td className="border px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <button className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md text-white" title="Edit">
+                          <FaEdit />
+                        </button>
+                        <button className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md text-white" title="Delete">
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <Droppable droppableId="taxTable">
-                  {(provided) => (
-                    <tbody ref={provided.innerRef} {...provided.droppableProps}>
-                      {currentTaxes.map((tax, idx) => (
-                        <Draggable key={tax.id} draggableId={tax.id} index={idx}>
-                          {(provided) => (
-                            <tr
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                            >
-                              <td
-                                className="border px-4 py-2 text-gray-600 cursor-move"
-                                {...provided.dragHandleProps}
-                                title="Drag to reorder"
-                              >
-                                <FaArrowsAlt />
-                              </td>
-                              <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
-                              <td className="border px-4 py-2">{tax.name}</td>
-                              <td className="border px-4 py-2">{tax.price}</td>
-                              <td className="border px-4 py-2">
-                                <span
-                                  className={`text-white p-1.5 text-xs rounded-md inline-block ${tax.status === "active" ? "bg-green-500" : "bg-gray-400"
-                                    }`}
-                                >
-                                  {tax.status === "active" ? <FaCheck /> : ""}
-                                </span>
-                              </td>
-                              <td className="border px-4 py-2 md:w-32">{tax.createdDate}</td>
-                              <td className="border px-4 py-2 md:w-32">{tax.updatedDate}</td>
-                              <td className="border px-4 py-2">
-                                <div className="flex items-center gap-2">
-                                  <button className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md text-white" title="Edit">
-                                    <FaEdit />
-                                  </button>
-                                  <button className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md text-white" title="Delete">
-                                    <FaTrash />
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </tbody>
-                  )}
-                </Droppable>
-              </table>
-            </DragDropContext>
+
+                ))}
+              </tbody>
+
+            </table>
           </div>
 
 

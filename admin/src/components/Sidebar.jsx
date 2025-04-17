@@ -259,7 +259,7 @@ export default function Sidebar({ setOpenSidebar }) {
                 <Link to="/admin/gallery" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/gallery' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaEnvira />Gallery </div>
                 </Link>
-                <Link to="/subscribers" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/subscribers' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                <Link to="/admin/subscribers" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/subscribers' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaCartShopping />Email Subscribers </div>
                 </Link>
                 <Link to="/admin/settings" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/settings' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>

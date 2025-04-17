@@ -60,6 +60,22 @@ export const getTaxById = async (req, res) => {
   }
 };
 
+// Toggle Category Status
+export const toggleTaxStatus = async (req, res) => {
+    try {
+        const tax = await Tax.findById(req.params.id);
+        if (!tax) return res.status(404).json({ message: "tax not found" });
+
+        tax.status = !tax.status;
+        await tax.save();
+
+        res.status(200).json({ message: "tax status updated", status: tax.status });
+    } catch (err) {
+        console.error("Toggle Status Error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
 // update
 export const updateTax = async (req, res) => {
   try {

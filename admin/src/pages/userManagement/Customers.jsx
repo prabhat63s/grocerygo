@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import CommonLayout from '../../components/layout/CommonLayout';
-import { FaArrowsAlt, FaCheck, FaEdit, FaEye, FaPlus, FaTrash } from 'react-icons/fa';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { FaCheck, FaEdit, FaEye, FaPlus, FaTrash } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 export default function Customers() {
@@ -54,18 +53,6 @@ export default function Customers() {
         if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
     };
 
-    const handleDragEnd = (result) => {
-        if (!result.destination) return;
-
-        const updated = [...customers];
-        const sourceIndex = indexOfFirst + result.source.index;
-        const destinationIndex = indexOfFirst + result.destination.index;
-        const [removed] = updated.splice(sourceIndex, 1);
-        updated.splice(destinationIndex, 0, removed);
-
-        setCustomers(updated);
-    };
-
     return (
         <CommonLayout>
             <div className="flex flex-col gap-5 p-5">
@@ -105,74 +92,58 @@ export default function Customers() {
                     </div>
 
                     <div className="overflow-x-auto mt-4">
-                        <DragDropContext onDragEnd={handleDragEnd}>
-                            <table className="min-w-full text-sm border border-gray-200 rounded-md">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="border px-4 py-2 text-left"></th>
-                                        <th className="border px-4 py-2 text-left">#</th>
-                                        <th className="border px-4 py-2 text-left">Name</th>
-                                        <th className="border px-4 py-2 text-left">Email</th>
-                                        <th className="border px-4 py-2 text-left">Mobile</th>
-                                        <th className="border px-4 py-2 text-left">Referral Code</th>
-                                        <th className="border px-4 py-2 text-left">Login With</th>
-                                        <th className="border px-4 py-2 text-left">Verification</th>
-                                        <th className="border px-4 py-2 text-left">Status</th>
-                                        <th className="border px-4 py-2 text-left">Created Date</th>
-                                        <th className="border px-4 py-2 text-left">Updated Date</th>
-                                        <th className="border px-4 py-2 text-left">Action</th>
+                        <table className="min-w-full text-sm border border-gray-200 rounded-md">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="border px-4 py-2 text-left">#</th>
+                                    <th className="border px-4 py-2 text-left">Name</th>
+                                    <th className="border px-4 py-2 text-left">Email</th>
+                                    <th className="border px-4 py-2 text-left">Mobile</th>
+                                    <th className="border px-4 py-2 text-left">Referral Code</th>
+                                    <th className="border px-4 py-2 text-left">Login With</th>
+                                    <th className="border px-4 py-2 text-left">Verification</th>
+                                    <th className="border px-4 py-2 text-left">Status</th>
+                                    <th className="border px-4 py-2 text-left">Created Date</th>
+                                    <th className="border px-4 py-2 text-left">Updated Date</th>
+                                    <th className="border px-4 py-2 text-left">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentCustomers.map((customer, idx) => (
+                                    <tr
+                                        className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
+                                    >
+
+                                        <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
+                                        <td className="border px-4 py-2">{customer.name}</td>
+                                        <td className="border px-4 py-2">{customer.email}</td>
+                                        <td className="border px-4 py-2">{customer.mobile}</td>
+                                        <td className="border px-4 py-2">{customer.referralCode}</td>
+                                        <td className="border px-4 py-2">{customer.loginWith}</td>
+                                        <td className="border px-4 py-2">{customer.verificationStatus}</td>
+                                        <td className="border px-4 py-2">
+                                            {customer.status === "Active" ? <span className="bg-green-500 text-white text-xs inline-flex items-center justify-center p-1.5 rounded">
+                                                <FaCheck className="text-sm" />
+                                            </span> : "-"}</td>
+                                        <td className="border px-4 py-2">{customer.createdDate}</td>
+                                        <td className="border px-4 py-2">{customer.updatedDate}</td>
+                                        <td className="border px-4 py-2 text-white">
+                                            <div className="flex items-center gap-2">
+                                                <button className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
+                                                    <FaEdit />
+                                                </button>
+                                                <button className="bg-black hover:bg-neutral-700 p-1.5 rounded-md" title="Edit">
+                                                    <FaEye />
+                                                </button>
+                                                <button className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
+                                                    <FaTrash />
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <Droppable droppableId="customerTable">
-                                    {(provided) => (
-                                        <tbody ref={provided.innerRef} {...provided.droppableProps}>
-                                            {currentCustomers.map((customer, idx) => (
-                                                <Draggable key={customer.id} draggableId={customer.id} index={idx}>
-                                                    {(provided) => (
-                                                        <tr
-                                                            ref={provided.innerRef}
-                                                            {...provided.draggableProps}
-                                                            className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
-                                                        >
-                                                            <td className="border px-4 py-2 cursor-move text-gray-600" {...provided.dragHandleProps}>
-                                                                <FaArrowsAlt />
-                                                            </td>
-                                                            <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
-                                                            <td className="border px-4 py-2">{customer.name}</td>
-                                                            <td className="border px-4 py-2">{customer.email}</td>
-                                                            <td className="border px-4 py-2">{customer.mobile}</td>
-                                                            <td className="border px-4 py-2">{customer.referralCode}</td>
-                                                            <td className="border px-4 py-2">{customer.loginWith}</td>
-                                                            <td className="border px-4 py-2">{customer.verificationStatus}</td>
-                                                            <td className="border px-4 py-2">
-                                                                {customer.status === "Active" ? <span className="bg-green-500 text-white text-xs inline-flex items-center justify-center p-1.5 rounded">
-                                                                    <FaCheck className="text-sm" />
-                                                                </span> : "-"}</td>
-                                                            <td className="border px-4 py-2">{customer.createdDate}</td>
-                                                            <td className="border px-4 py-2">{customer.updatedDate}</td>
-                                                            <td className="border px-4 py-2 text-white">
-                                                                <div className="flex items-center gap-2">
-                                                                    <button className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
-                                                                        <FaEdit />
-                                                                    </button>
-                                                                    <button className="bg-black hover:bg-neutral-700 p-1.5 rounded-md" title="Edit">
-                                                                        <FaEye />
-                                                                    </button>
-                                                                    <button className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
-                                                                        <FaTrash />
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </Draggable>
-                                            ))}
-                                            {provided.placeholder}
-                                        </tbody>
-                                    )}
-                                </Droppable>
-                            </table>
-                        </DragDropContext>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
 
                     <div className="flex justify-between items-center mt-4 text-sm text-gray-600">

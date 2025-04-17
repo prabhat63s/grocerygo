@@ -68,6 +68,17 @@ const useCategory = () => {
     }
   };
 
+  // toggle status of a category
+  const handleToggleStatus = async (id) => {
+    try {
+      await axios.patch(`${import.meta.env.VITE_BASE_URL}/categories/${id}/toggle-status`);
+
+      fetchCategories();
+    } catch (err) {
+      console.error("Status toggle failed:", err);
+    }
+  };
+
   // delete a category
   const deleteCategory = async (id) => {
     try {
@@ -121,6 +132,7 @@ const useCategory = () => {
     error,
     category,
     fetchCategories,
+    handleToggleStatus,
     fetchCategoryById,
     updateCategory,
     deleteCategory,

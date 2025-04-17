@@ -4,7 +4,8 @@ import {
   getAllTaxes,
   getTaxById,
   updateTax,
-  deleteTax
+  deleteTax,
+  toggleTaxStatus
 } from '../controllers/taxController.js';
 import { isAdmin, protect } from '../middleware/authMiddleware.js';
 
@@ -16,6 +17,8 @@ router.post('/', protect, isAdmin, createTax);
 router.get('/', getAllTaxes);
 // Get one tax by ID
 router.get('/:id', getTaxById);
+// toggle tax status
+router.patch("/:id/toggle-status", toggleTaxStatus);
 // Update tax by ID
 router.put('/:id', protect, isAdmin, updateTax);
 // Delete tax by ID

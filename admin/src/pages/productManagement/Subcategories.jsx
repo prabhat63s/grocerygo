@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import CommonLayout from '../../components/layout/CommonLayout';
-import { FaArrowsAlt, FaCheck, FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { FaCheck, FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import useSubCategory from '../../hook/useSubCategory';
 import { FaX } from 'react-icons/fa6';
@@ -14,6 +13,7 @@ export default function Subcategories() {
     loading,
     error,
     deleteSubCategory,
+    handleToggleStatus
   } = useSubCategory();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,20 +39,6 @@ export default function Subcategories() {
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
-  };
-
-  // Adjust the drag indices based on pagination offset
-  const handleDragEnd = (result) => {
-    if (!result.destination) return;
-
-    // Create a copy of the entire subcategories list
-    const updatedSubcategories = [...subCategories];
-    const sourceIndex = indexOfFirst + result.source.index;
-    const destinationIndex = indexOfFirst + result.destination.index;
-
-    const [removed] = updatedSubcategories.splice(sourceIndex, 1);
-    updatedSubcategories.splice(destinationIndex, 0, removed);
-
   };
 
   const confirmDelete = (catId) => {
@@ -112,68 +98,57 @@ export default function Subcategories() {
             ) : error ? (
               <div className="text-center py-10 text-red-500">{error}</div>
             ) : (
-              <DragDropContext onDragEnd={handleDragEnd}>
-                <table className="min-w-full text-sm border border-gray-200 rounded-md">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="border px-4 py-2 text-left"></th>
-                      <th className="border px-4 py-2 text-left">#</th>
-                      <th className="border px-4 py-2 text-left">Subcategory Name</th>
-                      <th className="border px-4 py-2 text-left">Category Name</th>
-                      <th className="border px-4 py-2 text-left">Status</th>
-                      <th className="border px-4 py-2 text-left">Created Date</th>
-                      <th className="border px-4 py-2 text-left">Updated Date</th>
-                      <th className="border px-4 py-2 text-left">Action</th>
+              <table className="min-w-full text-sm border border-gray-200 rounded-md">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="border px-4 py-2 text-left"></th>
+                    <th className="border px-4 py-2 text-left">#</th>
+                    <th className="border px-4 py-2 text-left">Subcategory Name</th>
+                    <th className="border px-4 py-2 text-left">Category Name</th>
+                    <th className="border px-4 py-2 text-left">Status</th>
+                    <th className="border px-4 py-2 text-left">Created Date</th>
+                    <th className="border px-4 py-2 text-left">Updated Date</th>
+                    <th className="border px-4 py-2 text-left">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentSubcategories.map((cat, idx) => (
+                    <tr
+                      key={idx}
+                      className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
+                    >
+                      <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
+                      <td className="border px-4 py-2">{cat.name}</td>
+                      <td className="border px-4 py-2">{cat.category?.name || "-"}</td>
+                      <td className="border px-4 py-2">
+                        <span
+                          onClick={() => handleToggleStatus(cat._id)}
+                          className={`text-white w-fit p-1.5 rounded-md flex items-center justify-center cursor-pointer ${cat.status ? "bg-green-500" : "bg-red-500"}`}
+                        >
+                          {cat.status ? <FaCheck /> : <FaX />}
+                        </span>
+                      </td>
+                      <td className="border px-4 py-2 md:w-32">{new Date(cat.createdAt).toLocaleString()}</td>
+                      <td className="border px-4 py-2 md:w-32">{new Date(cat.updatedAt).toLocaleString()}</td>
+                      <td className="border px-4 py-2 text-white">
+                        <div className="flex items-center gap-2">
+                          <Link to={`/admin/sub-category/${cat._id}`} className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
+                            <FaEdit />
+                          </Link>
+                          <button
+                            onClick={() => confirmDelete(cat._id)}
+                            className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md"
+                            title="Delete"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
-                  </thead>
-                  <Droppable droppableId="subcategoryTable">
-                    {(provided) => (
-                      <tbody ref={provided.innerRef} {...provided.droppableProps}>
-                        {currentSubcategories.map((cat, idx) => (
-                          <Draggable key={cat._id} draggableId={cat.id} index={idx}>
-                            {(provided) => (
-                              <tr
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
-                              >
-                                <td className="border px-4 py-2 text-gray-600 cursor-move" {...provided.dragHandleProps} title="Move">
-                                  <FaArrowsAlt />
-                                </td>
-                                <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
-                                <td className="border px-4 py-2">{cat.name}</td>
-                                <td className="border px-4 py-2">{cat.category?.name || "-"}</td>
-                                <td className="border px-4 py-2">
-                                  <span className="bg-green-500 text-white w-fit p-1.5 rounded-md flex items-center justify-center">
-                                    {cat.status ? <FaCheck /> : <FaX />}
-                                  </span>
-                                </td>
-                                <td className="border px-4 py-2 md:w-32">{new Date(cat.createdAt).toLocaleString()}</td>
-                                <td className="border px-4 py-2 md:w-32">{new Date(cat.updatedAt).toLocaleString()}</td>
-                                <td className="border px-4 py-2 text-white">
-                                  <div className="flex items-center gap-2">
-                                    <Link to={`/admin/sub-category/${cat._id}`} className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
-                                      <FaEdit />
-                                    </Link>
-                                    <button
-                                      onClick={() => confirmDelete(cat._id)}
-                                      className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md"
-                                      title="Delete"
-                                    >
-                                      <FaTrash />
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </tbody>
-                    )}
-                  </Droppable>
-                </table>
-              </DragDropContext>)}
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
 
           {/* Pagination Footer */}

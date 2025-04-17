@@ -4,7 +4,8 @@ import {
     getAllSubCategories,
     getSubCategoryById,
     updateSubCategory,
-    deleteSubCategory
+    deleteSubCategory,
+    toggleSubCategoryStatus
 } from "../controllers/subCategoryController.js";
 import { isAdmin, protect } from "../middleware/authMiddleware.js";
 
@@ -19,8 +20,11 @@ router.get("/", getAllSubCategories);
 // get a subcategory by ID
 router.get("/:id", getSubCategoryById);
 
-// get a subcategory by ID
+// update a subcategory by ID
 router.put("/:id", protect, isAdmin, updateSubCategory);
+
+// toggle subcategory status
+router.patch("/:id/toggle-status", toggleSubCategoryStatus);
 
 // delete a subcategory by ID
 router.delete("/:id", protect, isAdmin, deleteSubCategory);

@@ -57,6 +57,16 @@ const useTax = () => {
         }
     };
 
+    // toggle status of a category
+    const handleToggleStatus = async (id) => {
+        try {
+            await axios.patch(`${import.meta.env.VITE_BASE_URL}/taxes/${id}/toggle-status`);
+
+            fetchTaxes();
+        } catch (err) {
+            console.error("Status toggle failed:", err);
+        }
+    };
 
     // Update tax
     const updateTax = async (id, updatedTax) => {
@@ -112,6 +122,7 @@ const useTax = () => {
         error,
         fetchTaxes,
         fetchTaxById,
+        handleToggleStatus,
         updateTax,
         deleteTax,
     };

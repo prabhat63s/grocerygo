@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import CommonLayout from '../../components/layout/CommonLayout';
 import { Link } from 'react-router-dom';
-import { FaPlus, FaEdit, FaTrash, FaArrowsAlt } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 
 export default function StoreReviews() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -82,7 +82,6 @@ export default function StoreReviews() {
             <table className="min-w-full text-sm border border-gray-200 rounded-md">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="border px-4 py-2"></th>
                   <th className="border px-4 py-2">#</th>
                   <th className="border px-4 py-2">Image</th>
                   <th className="border px-4 py-2">Name</th>
@@ -98,7 +97,6 @@ export default function StoreReviews() {
                 {currentReviews.length > 0 ? (
                   currentReviews.map((review, index) => (
                     <tr key={review.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border px-4 py-2 text-center cursor-move"><FaArrowsAlt /></td>
                       <td className="border px-4 py-2">{indexOfFirst + index + 1}</td>
                       <td className="border px-4 py-2">
                         <img src={review.image} alt="avatar" className="w-10 h-10 rounded-full" />

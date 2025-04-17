@@ -119,6 +119,14 @@ const productSchema = new mongoose.Schema({
     description: {
         type: String
     },
+    todaySpecial: {
+        type: Boolean,
+        default: true,
+    },
+    status: {
+        type: Boolean,
+        default: true,
+    }
 }, {
     timestamps: true
 });

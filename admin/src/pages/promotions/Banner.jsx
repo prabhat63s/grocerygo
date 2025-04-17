@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import CommonLayout from '../../components/layout/CommonLayout';
-import { FaArrowsAlt, FaCheck, FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { FaCheck, FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
 import { Link, useParams } from 'react-router-dom';
 
 export default function Banner() {
@@ -49,19 +48,6 @@ export default function Banner() {
     if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
   };
 
-  const handleDragEnd = (result) => {
-    if (!result.destination) return;
-
-    const updatedList = [...banners];
-    const sourceIndex = startIndex + result.source.index;
-    const destinationIndex = startIndex + result.destination.index;
-
-    const [movedItem] = updatedList.splice(sourceIndex, 1);
-    updatedList.splice(destinationIndex, 0, movedItem);
-
-    setBanners(updatedList);
-  };
-
   return (
     <CommonLayout>
       <div className="flex flex-col gap-5 p-5">
@@ -94,11 +80,9 @@ export default function Banner() {
           </div>
 
           <div className="overflow-x-auto mt-4">
-            <DragDropContext onDragEnd={handleDragEnd}>
               <table className="min-w-full text-sm border border-gray-200 rounded-md">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="border px-4 py-2 text-left"></th>
                     <th className="border px-4 py-2 text-left">#</th>
                     <th className="border px-4 py-2 text-left">Image</th>
                     <th className="border px-4 py-2 text-left">Category</th>
@@ -109,18 +93,11 @@ export default function Banner() {
                     <th className="border px-4 py-2 text-left">Action</th>
                   </tr>
                 </thead>
-                <Droppable droppableId="banner-table" direction="vertical">
-                  {(provided) => (
-                    <tbody ref={provided.innerRef} {...provided.droppableProps}>
+                    <tbody>
                       {currentBanners.map((banner, index) => (
-                        <Draggable key={banner.id} draggableId={banner.id} index={index}>
-                          {(provided) => (
                             <tr
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
                               className={index % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
                             >
-                              <td className="border px-4 py-2 text-gray-600 cursor-move" {...provided.dragHandleProps}><FaArrowsAlt /></td>
                               <td className="border px-4 py-2">{startIndex + index + 1}</td>
                               <td className="border px-4 py-2"><img src={banner.image} alt="Banner" className="h-12 rounded" /></td>
                               <td className="border px-4 py-2">{banner.category}</td>
@@ -143,15 +120,9 @@ export default function Banner() {
                                 </div>
                               </td>
                             </tr>
-                          )}
-                        </Draggable>
                       ))}
-                      {provided.placeholder}
                     </tbody>
-                  )}
-                </Droppable>
               </table>
-            </DragDropContext>
           </div>
 
           <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
