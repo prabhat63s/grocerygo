@@ -1,15 +1,38 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import CommonLayout from '../../components/layout/CommonLayout';
+import useSubCategory from '../../hook/useSubCategory';
+import useCategory from '../../hook/useCategory';
+import { toast } from 'sonner';
 
 export default function AddSubcategories() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { categories } = useCategory();
+
+  const {
+    fetchSubCategoryById,
+    updateSubCategory,
+    createSubCategory
+  } = useSubCategory();
+
   // Initialize form data state
   const [formData, setFormData] = useState({
     name: '',
     category: '',
   });
 
-  const navigate = useNavigate();
+  // Fetch the subcategory for editing if the `id` exists
+  useEffect(() => {
+    if (id) {
+      fetchSubCategoryById(id).then((data) => {
+        setFormData({
+          name: data.name,
+          category: data.category,
+        });
+      });
+    }
+  }, [id, fetchSubCategoryById]);
 
   // Handle changes for both text and select inputs
   const handleInputChange = (e) => {
@@ -23,11 +46,19 @@ export default function AddSubcategories() {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Process the form data (e.g., send to an API)
-    console.log('Form Submitted:', formData);
 
-    // Optionally, navigate back to the Subcategories list after submission
-    navigate('/admin/sub-category');
+    // If `id` exists, update the subcategory, otherwise create a new one
+    if (id) {
+      updateSubCategory(id, formData).then(() => {
+        navigate('/admin/sub-category');
+        toast.success('Updated saved successfully');
+      });
+    } else {
+      createSubCategory(formData).then(() => {
+        navigate('/admin/sub-category');
+        toast.success('Created saved successfully');
+      });
+    }
   };
 
   // Handle cancel action (navigate back or clear form)
@@ -38,9 +69,9 @@ export default function AddSubcategories() {
   return (
     <CommonLayout>
       <div className="flex flex-col gap-5 p-5">
-<div className="flex justify-between md:flex-row flex-col gap-3 md:items-center">
+        <div className="flex justify-between md:flex-row flex-col gap-3 md:items-center">
           <h1 className="text-2xl font-semibold">
-            <Link to="/admin/sub-category">Subcategories</Link> / Add New
+            <Link to="/admin/sub-category">Subcategories</Link> / {id ? 'Update' : 'Add New'}
           </h1>
         </div>
 
@@ -65,7 +96,6 @@ export default function AddSubcategories() {
               <label className="block mb-1 font-medium">
                 Category <span className="text-red-500">*</span>
               </label>
-              {/* Replace file input with a select option */}
               <select
                 name="category"
                 value={formData.category}
@@ -74,12 +104,11 @@ export default function AddSubcategories() {
                 required
               >
                 <option value="">Select Category</option>
-                <option value="Beverage">Beverage</option>
-                <option value="Vegetables">Vegetables</option>
-                <option value="Bread & Bakery">Bread & Bakery</option>
-                <option value="Snacks">Snacks</option>
-                <option value="Dairy Products">Dairy Products</option>
-                {/* Add additional options as needed */}
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -96,7 +125,7 @@ export default function AddSubcategories() {
               type="submit"
               className="bg-black text-white px-4 py-2 rounded"
             >
-              Save
+              {id ? 'Update' : 'Save'}
             </button>
           </div>
         </form>

@@ -16,10 +16,13 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import DeleteConfirmationModal from '../../components/modals/DeleteConfirmationModal';
+import { toast } from 'sonner';
+import useTax from '../../hook/useTax';
 
 function SortableRow({ tax, idx, index, handleEdit, handleDelete }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: tax.id });
+    useSortable({ id: tax._id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -45,8 +48,8 @@ function SortableRow({ tax, idx, index, handleEdit, handleDelete }) {
           {tax.status || <FaCheck />}
         </span>
       </td>
-      <td className="border px-4 py-2 md:w-32">{tax.createdDate}</td>
-      <td className="border px-4 py-2 md:w-32">{tax.updatedDate}</td>
+      <td className="border px-4 py-2 md:w-32">{new Date(tax.createdAt).toLocaleString()}</td>
+      <td className="border px-4 py-2 md:w-32">{new Date(tax.updatedAt).toLocaleString()}</td>
       <td className="border px-4 py-2 text-white">
         <div className="flex items-center gap-2">
           <button
@@ -70,28 +73,18 @@ function SortableRow({ tax, idx, index, handleEdit, handleDelete }) {
 }
 
 export default function Tax() {
-  const initialTaxes = [
-    {
-      id: '1',
-      name: 'SGST',
-      tax: '9%',
-      status: '',
-      createdDate: 'Jun 10, 2024 09:10 AM',
-      updatedDate: 'Jan 27, 2025 11:36 PM',
-    },
-    {
-      id: '2',
-      name: 'CGST',
-      tax: '9%',
-      status: '',
-      createdDate: 'Jun 10, 2024 09:10 AM',
-      updatedDate: 'Jan 27, 2025 11:36 PM',
-    },
-  ];
+  const {
+    taxes,
+    setTaxes,
+    deleteTax,
+    loading,
+    error,
+  } = useTax();
 
-  const [taxes, setTaxes] = useState(initialTaxes);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
   const rowsPerPage = 5;
 
   const sensors = useSensors(useSensor(PointerSensor));
@@ -107,10 +100,15 @@ export default function Tax() {
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
+
     if (active.id !== over?.id) {
-      const activeIndex = taxes.findIndex((item) => item.id === active.id);
-      const overIndex = taxes.findIndex((item) => item.id === over?.id);
-      setTaxes((prev) => arrayMove(prev, activeIndex, overIndex));
+      const oldIndex = taxes.findIndex((item) => item._id === active.id);
+      const newIndex = taxes.findIndex((item) => item._id === over.id);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const reordered = arrayMove(taxes, oldIndex, newIndex);
+        setTaxes(reordered);
+      }
     }
   };
 
@@ -122,8 +120,32 @@ export default function Tax() {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
   };
 
+  const confirmDelete = (catId) => {
+    setDeleteId(catId);
+    setShowDeleteModal(true);
+  };
+
+  const handleEdit = (id) => {
+    window.location.href = `/admin/tax/${id}`;
+  };
+
+  const handleDeleteConfirmed = async () => {
+    if (deleteId) {
+      await deleteTax(deleteId);
+      toast.success('Tax deleted successfully!');
+      setDeleteId(null);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setDeleteId(null);
+  };
+
   return (
     <CommonLayout>
+      <DeleteConfirmationModal show={showDeleteModal} onCancel={handleDeleteCancel} onConfirm={handleDeleteConfirmed} />
       <div className="flex flex-col gap-5 p-5">
         <div className="flex justify-between md:flex-row flex-col gap-3 md:items-center">
           <h1 className="text-2xl font-semibold">Tax</h1>
@@ -149,7 +171,7 @@ export default function Tax() {
               <span>Search:</span>
               <input
                 type="search"
-                placeholder="Search by product name"
+                placeholder="Search by tax name"
                 className="border w-full md:w-fit px-4 py-1 rounded-md outline-none"
                 value={searchTerm}
                 onChange={(e) => {
@@ -161,37 +183,44 @@ export default function Tax() {
           </div>
 
           <div className="overflow-x-auto mt-4">
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={currentTaxes.map((item) => item.id)} strategy={verticalListSortingStrategy}>
-                <table className="min-w-full text-sm border border-gray-200 rounded-md">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="border px-4 py-2 text-left"></th>
-                      <th className="border px-4 py-2 text-left">#</th>
-                      <th className="border px-4 py-2 text-left">Name</th>
-                      <th className="border px-4 py-2 text-left">Tax</th>
-                      <th className="border px-4 py-2 text-left">Status</th>
-                      <th className="border px-4 py-2 text-left">Created Date</th>
-                      <th className="border px-4 py-2 text-left">Updated Date</th>
-                      <th className="border px-4 py-2 text-left">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentTaxes.map((tax, idx) => (
-                      <SortableRow
-                        key={tax.id}
-                        tax={tax}
-                        idx={indexOfFirst + idx + 1}
-                        index={idx}
-                        handleEdit={() => { }}
-                        handleDelete={() => { }}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </SortableContext>
-            </DndContext>
+            {loading ? (
+              <div className="text-center py-10 text-gray-500">Loading...</div>
+            ) : error ? (
+              <div className="text-center py-10 text-red-500">{error}</div>
+            ) : (
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={currentTaxes.map((item) => item._id)} strategy={verticalListSortingStrategy}>
+                  <table className="min-w-full text-sm border border-gray-200 rounded-md">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="border px-4 py-2 text-left"></th>
+                        <th className="border px-4 py-2 text-left">#</th>
+                        <th className="border px-4 py-2 text-left">Name</th>
+                        <th className="border px-4 py-2 text-left">Tax</th>
+                        <th className="border px-4 py-2 text-left">Status</th>
+                        <th className="border px-4 py-2 text-left">Created Date</th>
+                        <th className="border px-4 py-2 text-left">Updated Date</th>
+                        <th className="border px-4 py-2 text-left">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentTaxes.map((tax, idx) => (
+                        <SortableRow
+                          key={tax._id}
+                          tax={tax}
+                          idx={indexOfFirst + idx + 1}
+                          index={idx}
+                          handleEdit={() => handleEdit(tax.id)}
+                          handleDelete={() => confirmDelete(tax.id)}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                </SortableContext>
+              </DndContext>
+            )}
           </div>
+          {/* Pagination */}
 
           <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
             <div>

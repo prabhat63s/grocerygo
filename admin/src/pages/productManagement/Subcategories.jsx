@@ -3,29 +3,28 @@ import CommonLayout from '../../components/layout/CommonLayout';
 import { FaArrowsAlt, FaCheck, FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Link } from 'react-router-dom';
+import useSubCategory from '../../hook/useSubCategory';
+import { FaX } from 'react-icons/fa6';
+import DeleteConfirmationModal from '../../components/modals/DeleteConfirmationModal';
+import { toast } from 'sonner';
 
 export default function Subcategories() {
-  const initialSubcategories = [
-    { id: '1', subcategoryName: 'Dishwashing soap', categoryName: 'Cleaning Supplies', status: '', createdDate: 'Aug 01, 2022 03:36 AM', updatedDate: 'Aug 01, 2022 03:36 AM' },
-    { id: '2', subcategoryName: 'Fresh Fruits', categoryName: 'Fruits', status: '', createdDate: 'Aug 08, 2022 04:13 AM', updatedDate: 'Aug 09, 2022 02:16 PM' },
-    { id: '3', subcategoryName: 'Cream', categoryName: 'Dairy Products', status: '', createdDate: 'Aug 08, 2022 04:06 AM', updatedDate: 'Aug 08, 2022 04:06 AM' },
-    { id: '4', subcategoryName: 'Sweets', categoryName: 'Dairy Products', status: '', createdDate: 'Aug 08, 2022 04:05 AM', updatedDate: 'Aug 08, 2022 04:05 AM' },
-    { id: '5', subcategoryName: 'Milk', categoryName: 'Dairy Products', status: '', createdDate: 'Aug 08, 2022 04:04 AM', updatedDate: 'Aug 08, 2022 04:04 AM' },
-    { id: '6', subcategoryName: 'Cold/Energy Drinks', categoryName: 'Beverage', status: '', createdDate: 'Aug 05, 2022 06:30 AM', updatedDate: 'Aug 05, 2022 06:30 AM' },
-    { id: '7', subcategoryName: 'Soft Drinks', categoryName: 'Beverage', status: '', createdDate: 'Aug 05, 2022 06:30 AM', updatedDate: 'Aug 09, 2022 08:36 PM' },
-    { id: '8', subcategoryName: 'Fresh Juice', categoryName: 'Beverage', status: '', createdDate: 'Aug 01, 2022 03:44 AM', updatedDate: 'Aug 01, 2022 03:44 AM' },
-    { id: '9', subcategoryName: 'Coffee', categoryName: 'Beverage', status: '', createdDate: 'Aug 01, 2022 03:43 AM', updatedDate: 'Aug 01, 2022 03:43 AM' },
-    { id: '10', subcategoryName: 'Ghee', categoryName: 'Dairy Products', status: '', createdDate: 'Aug 01, 2022 03:43 AM', updatedDate: 'Aug 01, 2022 03:43 AM' },
-  ];
+  const {
+    subCategories,
+    loading,
+    error,
+    deleteSubCategory,
+  } = useSubCategory();
 
-  const [subcategories, setSubcategories] = useState(initialSubcategories);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
   const rowsPerPage = 5;
 
   // Filter subcategories based on the subcategory name
-  const filteredSubcategories = subcategories.filter(item =>
-    item.subcategoryName.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSubcategories = subCategories.filter(item =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredSubcategories.length / rowsPerPage);
@@ -47,18 +46,37 @@ export default function Subcategories() {
     if (!result.destination) return;
 
     // Create a copy of the entire subcategories list
-    const updatedSubcategories = [...subcategories];
+    const updatedSubcategories = [...subCategories];
     const sourceIndex = indexOfFirst + result.source.index;
     const destinationIndex = indexOfFirst + result.destination.index;
 
     const [removed] = updatedSubcategories.splice(sourceIndex, 1);
     updatedSubcategories.splice(destinationIndex, 0, removed);
 
-    setSubcategories(updatedSubcategories);
+  };
+
+  const confirmDelete = (catId) => {
+    setDeleteId(catId);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirmed = async () => {
+    if (deleteId) {
+      await deleteSubCategory(deleteId);
+      toast.success("Subcategory deleted successfully!");
+      setDeleteId(null);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setDeleteId(null);
   };
 
   return (
     <CommonLayout>
+      <DeleteConfirmationModal show={showDeleteModal} onCancel={handleDeleteCancel} onConfirm={handleDeleteConfirmed} />
       <div className="flex flex-col gap-5 p-5">
         <div className="flex justify-between md:flex-row flex-col gap-3 md:items-center">
           <h1 className="text-2xl font-semibold">Subcategories</h1>
@@ -77,7 +95,7 @@ export default function Subcategories() {
               <span>Search:</span>
               <input
                 type="search"
-                placeholder="Search by product name"
+                placeholder="Search by subcategory name"
                 className="border w-full md:w-fit px-4 py-1 rounded-md outline-none"
                 value={searchTerm}
                 onChange={(e) => {
@@ -89,64 +107,73 @@ export default function Subcategories() {
           </div>
 
           <div className="overflow-x-auto mt-4">
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <table className="min-w-full text-sm border border-gray-200 rounded-md">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="border px-4 py-2 text-left"></th>
-                    <th className="border px-4 py-2 text-left">#</th>
-                    <th className="border px-4 py-2 text-left">Subcategory Name</th>
-                    <th className="border px-4 py-2 text-left">Category Name</th>
-                    <th className="border px-4 py-2 text-left">Status</th>
-                    <th className="border px-4 py-2 text-left">Created Date</th>
-                    <th className="border px-4 py-2 text-left">Updated Date</th>
-                    <th className="border px-4 py-2 text-left">Action</th>
-                  </tr>
-                </thead>
-                <Droppable droppableId="subcategoryTable">
-                  {(provided) => (
-                    <tbody ref={provided.innerRef} {...provided.droppableProps}>
-                      {currentSubcategories.map((cat, idx) => (
-                        <Draggable key={cat.id} draggableId={cat.id} index={idx}>
-                          {(provided) => (
-                            <tr
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
-                            >
-                              <td className="border px-4 py-2 text-gray-600 cursor-move" {...provided.dragHandleProps} title="Move">
-                                <FaArrowsAlt />
-                              </td>
-                              <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
-                              <td className="border px-4 py-2">{cat.subcategoryName}</td>
-                              <td className="border px-4 py-2">{cat.categoryName}</td>
-                              <td className="border px-4 py-2">
-                                <span className="bg-green-500 text-white w-fit p-1.5 rounded-md flex items-center justify-center">
-                                  {cat.status || <FaCheck />}
-                                </span>
-                              </td>
-                              <td className="border px-4 py-2 md:w-32">{cat.createdDate}</td>
-                              <td className="border px-4 py-2 md:w-32">{cat.updatedDate}</td>
-                              <td className="border px-4 py-2 text-white">
-                                <div className="flex items-center gap-2">
-                                  <button className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
-                                    <FaEdit />
-                                  </button>
-                                  <button className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
-                                    <FaTrash />
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </tbody>
-                  )}
-                </Droppable>
-              </table>
-            </DragDropContext>
+            {loading ? (
+              <div className="text-center py-10 text-gray-500">Loading...</div>
+            ) : error ? (
+              <div className="text-center py-10 text-red-500">{error}</div>
+            ) : (
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <table className="min-w-full text-sm border border-gray-200 rounded-md">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="border px-4 py-2 text-left"></th>
+                      <th className="border px-4 py-2 text-left">#</th>
+                      <th className="border px-4 py-2 text-left">Subcategory Name</th>
+                      <th className="border px-4 py-2 text-left">Category Name</th>
+                      <th className="border px-4 py-2 text-left">Status</th>
+                      <th className="border px-4 py-2 text-left">Created Date</th>
+                      <th className="border px-4 py-2 text-left">Updated Date</th>
+                      <th className="border px-4 py-2 text-left">Action</th>
+                    </tr>
+                  </thead>
+                  <Droppable droppableId="subcategoryTable">
+                    {(provided) => (
+                      <tbody ref={provided.innerRef} {...provided.droppableProps}>
+                        {currentSubcategories.map((cat, idx) => (
+                          <Draggable key={cat._id} draggableId={cat.id} index={idx}>
+                            {(provided) => (
+                              <tr
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
+                              >
+                                <td className="border px-4 py-2 text-gray-600 cursor-move" {...provided.dragHandleProps} title="Move">
+                                  <FaArrowsAlt />
+                                </td>
+                                <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
+                                <td className="border px-4 py-2">{cat.name}</td>
+                                <td className="border px-4 py-2">{cat.category?.name || "-"}</td>
+                                <td className="border px-4 py-2">
+                                  <span className="bg-green-500 text-white w-fit p-1.5 rounded-md flex items-center justify-center">
+                                    {cat.status ? <FaCheck /> : <FaX />}
+                                  </span>
+                                </td>
+                                <td className="border px-4 py-2 md:w-32">{new Date(cat.createdAt).toLocaleString()}</td>
+                                <td className="border px-4 py-2 md:w-32">{new Date(cat.updatedAt).toLocaleString()}</td>
+                                <td className="border px-4 py-2 text-white">
+                                  <div className="flex items-center gap-2">
+                                    <Link to={`/admin/sub-category/${cat._id}`} className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
+                                      <FaEdit />
+                                    </Link>
+                                    <button
+                                      onClick={() => confirmDelete(cat._id)}
+                                      className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md"
+                                      title="Delete"
+                                    >
+                                      <FaTrash />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </tbody>
+                    )}
+                  </Droppable>
+                </table>
+              </DragDropContext>)}
           </div>
 
           {/* Pagination Footer */}

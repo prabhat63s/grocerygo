@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 
 const useSubCategory = () => {
@@ -23,26 +23,26 @@ const useSubCategory = () => {
   };
 
   // fetch a single subcategory by its ID
-  const fetchSubCategoryById = async (id) => {
+  const fetchSubCategoryById = useCallback(async (id) => {
     try {
       setLoading(true);
       setError(null);
       const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/subcategories/${id}`);
       setSubCategory(res.data);
+      return res.data; // also return it for external use
     } catch (err) {
       console.error("Error fetching subcategory:", err);
       setError(err.response?.data?.message || err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // update a subcategory
   const updateSubCategory = async (id, updatedSubCategory) => {
     try {
       setLoading(true);
       setError(null);
-
       const token = localStorage.getItem('token');
 
       const res = await axios.put(
@@ -51,13 +51,13 @@ const useSubCategory = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
+            'Content-Type': 'application/json',
           },
         }
       );
 
       setSubCategories((prev) =>
-        prev.map((sub) => (sub._id === id ? res.data.subCategory : sub))
+        prev.map((sub) => (sub._id === id ? res.data : sub))
       );
       return res.data;
     } catch (err) {
@@ -67,6 +67,7 @@ const useSubCategory = () => {
       setLoading(false);
     }
   };
+
 
   // delete a subcategory
   const deleteSubCategory = async (id) => {
@@ -95,13 +96,19 @@ const useSubCategory = () => {
       setLoading(true);
       setError(null);
       const token = localStorage.getItem("token");
-      const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/subcategories`, newSubCategory, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      setSubCategories((prev) => [...prev, res.data.subCategory]);
+
+      const res = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/subcategories`,
+        newSubCategory,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      setSubCategories((prev) => [...prev, res.data]);
       return res.data;
     } catch (err) {
       console.error("Error creating subcategory:", err);
@@ -110,6 +117,7 @@ const useSubCategory = () => {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchSubCategories();

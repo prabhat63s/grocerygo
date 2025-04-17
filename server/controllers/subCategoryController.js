@@ -1,13 +1,19 @@
+import mongoose from "mongoose";
 import SubCategory from "../models/subCategoryModel.js";
 
 // Create a new subcategory
 export const createSubCategory = async (req, res) => {
     try {
-        const { name, category, status } = req.body;
+        let { name, category, status } = req.body;
 
         // Validate required fields
         if (!name || !category) {
             return res.status(400).json({ message: "Name and category are required" });
+        }
+
+        // Convert category to ObjectId if it's a string
+        if (typeof category === "string") {
+            category = new mongoose.Types.ObjectId(category);
         }
 
         const newSubCategory = new SubCategory({
@@ -17,6 +23,7 @@ export const createSubCategory = async (req, res) => {
         });
 
         await newSubCategory.save();
+
         res.status(201).json(newSubCategory);
     } catch (error) {
         res.status(500).json({ message: error.message });

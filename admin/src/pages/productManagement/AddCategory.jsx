@@ -57,12 +57,13 @@ export default function AddCategory() {
 
     if (id) {
       await updateCategory(id, data);
+      toast.success('Updated saved successfully');
     } else {
       await createCategory(data);
+      toast.success('Category saved successfully');
     }
 
     navigate('/admin/category');
-    toast.success('Category saved successfully');
   };
 
   const handleCancel = () => {
