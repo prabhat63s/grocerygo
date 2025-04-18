@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import CommonLayout from '../../components/layout/CommonLayout';
 import { FaCheck, FaEdit, FaEye, FaPlus, FaTrash } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import { MdClose } from 'react-icons/md';
 import { useProduct } from '../../hook/useProduct';
+import { FaX } from 'react-icons/fa6';
+import DeleteConfirmationModal from '../../components/modals/DeleteConfirmationModal';
+import { toast } from 'sonner';
 
 export default function Products() {
-  const { products, fetchAllProducts, loading, } = useProduct();
+  const { products, fetchAllProducts, loading, deleteProduct } = useProduct();
 
 
   useEffect(() => {
@@ -15,6 +17,8 @@ export default function Products() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
   const rowsPerPage = 5;
 
   const filteredProducts = products.filter(item =>
@@ -35,8 +39,29 @@ export default function Products() {
   };
 
 
+  const confirmDelete = (catId) => {
+    setDeleteId(catId);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirmed = async () => {
+    if (deleteId) {
+      await deleteProduct(deleteId);
+      await fetchAllProducts();
+      toast.success("Subcategory deleted successfully!");
+      setDeleteId(null);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setDeleteId(null);
+  };
+
   return (
     <CommonLayout>
+      <DeleteConfirmationModal show={showDeleteModal} onCancel={handleDeleteCancel} onConfirm={handleDeleteConfirmed} />
       <div className="p-5 space-y-5">
         <div className="flex justify-between md:flex-row flex-col gap-3 md:items-center">
           <h1 className="text-2xl font-semibold">Products</h1>
@@ -55,6 +80,9 @@ export default function Products() {
             </Link>
           </div>
         </div>
+
+        <pre>{JSON.stringify(products, null, 2)}</pre>
+
 
         <div className="bg-white p-4 shadow rounded-md">
           <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-4">
@@ -96,11 +124,11 @@ export default function Products() {
               <tbody>
                 {currentProducts.map((product, idx) => (
                   <tr
-                  key={idx}
+                    key={idx}
                     className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
                   >
                     <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
-                    <td className="border px-4 py-2 flex flex-col">{product?.name} <span className="text-[10px] bg-green-500 w-fit px-2 my-1 rounded-md text-white flex items-center gap-1"><FaEye size={14} /> {product.productView}</span> </td>
+                    <td className="border px-4 py-2 flex flex-col">{product?.name} <img src={product?.productImage} alt="" className='h-12' /> <span className="text-[10px] bg-green-500 w-fit px-2 my-1 rounded-md text-white flex items-center gap-1"><FaEye size={14} /> {product.productView}</span> </td>
                     <td className="border px-4 py-2">{product?.category?.name}</td>
                     <td className="border px-4 py-2"> {product.sellingPrice !== "In Variants" ? (<>₹ {product.sellingPrice}</>) : (<span className="bg-blue-400 text-[10px] whitespace-nowrap py-1 px-2 text-white rounded-md">{product.price}</span>)} </td>
                     {/* <td className="border px-4 py-2 space-x-1 whitespace-nowrap">
@@ -147,20 +175,14 @@ export default function Products() {
                     </td>
 
                     <td className="border px-4 py-2">
-                      {product.todaySpecial === true || product.todaySpecial === "true" ? (
-                        <span className="bg-green-500 text-white rounded p-1.5 w-fit flex items-center justify-center">
-                          {product.status || <FaCheck />}
-                        </span>
-                      ) : (
-                        <span className="bg-red-500 text-white rounded p-1.5 w-fit flex items-center justify-center">
-                          {product.status || <MdClose />}
-                        </span>
-                      )}
+                      <span className="bg-green-500 text-white rounded p-1.5 w-fit flex items-center justify-center">
+                        {product.todaySpecial ? <FaCheck /> : <FaX />}
+                      </span>
                     </td>
 
                     <td className="border px-4 py-2">
                       <span className="bg-green-500 text-white rounded p-1.5 w-fit flex items-center justify-center">
-                        {product.status || <FaCheck />}
+                        {product.status ? <FaCheck /> : <FaX />}
                       </span>
                     </td>
                     <td className="border px-4 py-2 md:w-32">{new Date(product.createdAt).toLocaleString()}</td>
@@ -170,7 +192,7 @@ export default function Products() {
                         <button className="bg-blue-500 w-fit hover:bg-blue-600 text-white p-1.5 rounded-md">
                           <FaEdit />
                         </button>
-                        <button className="bg-red-500 w-fit hover:bg-red-600 text-white p-1.5 rounded-md">
+                        <button onClick={() => confirmDelete(product._id)} className="bg-red-500 w-fit hover:bg-red-600 text-white p-1.5 rounded-md">
                           <FaTrash />
                         </button>
                       </div>
@@ -183,7 +205,7 @@ export default function Products() {
 
           <div className="flex justify-between items-center text-sm text-gray-600 mt-4">
             <div>
-            Showing {products.length === 0 ? '0 to 0' : `${indexOfFirst + 1} to ${Math.min(indexOfLast, filteredProducts.length)}`} of {filteredProducts.length} entries
+              Showing {products.length === 0 ? '0 to 0' : `${indexOfFirst + 1} to ${Math.min(indexOfLast, filteredProducts.length)}`} of {filteredProducts.length} entries
             </div>
             <div className="space-x-2">
               <button

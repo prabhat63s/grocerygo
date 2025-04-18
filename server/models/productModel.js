@@ -50,16 +50,20 @@ const variantSchema = new mongoose.Schema({
 
 const stockManagementSchema = new mongoose.Schema({
     stockQty: {
-        type: Number
+        type: Number,
+        required: true,
     },
     minOrderQty: {
-        type: Number
+        type: Number,
+        required: true,
     },
     maxOrderQty: {
-        type: Number
+        type: Number,
+        required: true,
     },
     lowQtyWarning: {
-        type: Number
+        type: Number,
+        required: true,
     },
 });
 
@@ -69,7 +73,8 @@ const productSchema = new mongoose.Schema({
         required: true
     },
     sku: {
-        type: String
+        type: String,
+        required: true
     },
     videoURL: {
         type: String

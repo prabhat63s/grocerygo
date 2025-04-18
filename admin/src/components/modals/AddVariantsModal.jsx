@@ -29,24 +29,24 @@ export default function AddVariantsModal({ isOpen, onClose, setIsVariantsVisible
                 <div className="mt-4">
                     <form onSubmit={handleSubmit}>
                         <div className="mb-4">
-                            <label htmlFor="variant_name" className="block text-sm font-medium text-gray-700">
+                            <label className="block text-sm font-medium text-gray-700">
                                 Variant Name
                             </label>
                             <input
                                 className="mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                name="variant_name"
+                                // name="variant_name"
                                 type="text"
                                 placeholder="Variant Name, i.e Size, Color etc"
                             />
                         </div>
 
                         <div className="mb-4">
-                            <label htmlFor="variant_options" className="block text-sm font-medium text-gray-700">
+                            <label className="block text-sm font-medium text-gray-700">
                                 Variant Options
                             </label>
                             <input
                                 className="mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                name="variant_options"
+                                // name="variant_options"
                                 type="text"
                                 placeholder="Variant Options separated by | pipe symbol, i.e Black|Blue|Red"
                             />

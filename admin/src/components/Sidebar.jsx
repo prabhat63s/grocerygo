@@ -229,7 +229,7 @@ export default function Sidebar({ setOpenSidebar }) {
                     <div
                         className="pl-4 flex flex-col gap-2 transform transition-all duration-300 ease-out animate-slideDown"
                     >
-                        <Link to='/admin/aboutus' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/aboutus' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                        <Link to='/admin/about' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/about' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                             <div className="flex gap-2 items-center"><GoDotFill /> About Us</div>
                         </Link>
                         <Link to='/admin/privacypolicy' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/privacypolicy' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
@@ -238,7 +238,7 @@ export default function Sidebar({ setOpenSidebar }) {
                         <Link to='/admin/refundpolicy' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/refundpolicy' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                             <div className="flex gap-2 items-center"><GoDotFill /> Refund Policy</div>
                         </Link>
-                        <Link to='/admin/termscondition' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/termscondition' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                        <Link to='/admin/termsAndConditions' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/termsAndConditions' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                             <div className="flex gap-2 items-center"><GoDotFill /> Terms & Conditions</div>
                         </Link>
                     </div>

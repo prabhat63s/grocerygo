@@ -1,34 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTrash } from 'react-icons/fa6';
 import { FaEdit } from 'react-icons/fa';
 import CommonLayout from '../../components/layout/CommonLayout';
+import axios from 'axios';
 
 export default function FAQs() {
-    const initialFaqs = [
-        {
-            id: '1',
-            title: 'What is Grocers App?',
-            description:
-                'Grocers App is a mobile application developed by Gravity Infotech to empower small shops...',
-            createdAt: 'Aug 15, 2022 05:00 PM',
-            updatedAt: 'May 20, 2024 12:13 PM',
-        },
-        {
-            id: '2',
-            title: 'Will this App white labeled for my store?',
-            description:
-                'Yes, Grocers App is for your business. You can put your banners and select the theme...',
-            createdAt: 'Aug 15, 2022 05:00 PM',
-            updatedAt: 'May 20, 2024 12:13 PM',
-        },
-        // Add more items as needed
-    ];
-
-    const [faqs, setFaqs] = useState(initialFaqs);
+    const [faqs, setFaqs] = useState([]);
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
+
+    useEffect(() => {
+        const fetchFaqs = async () => {
+            try {
+                const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/faq/all`);
+                setFaqs(res.data);
+            } catch (err) {
+                console.error("Failed to fetch FAQs", err);
+            }
+        };
+        fetchFaqs();
+    }, []);
+
+    const handleDelete = async (id) => {
+        if (window.confirm("Are you sure you want to delete this FAQ?")) {
+            try {
+                await axios.delete(`${import.meta.env.VITE_BASE_URL}/faq/${id}`);
+                setFaqs(faqs.filter(faq => faq._id !== id));
+            } catch (err) {
+                console.error("Failed to delete FAQ", err);
+            }
+        }
+    };
 
     const filteredFaqs = faqs.filter((faq) =>
         faq.title.toLowerCase().includes(search.toLowerCase())
@@ -44,14 +48,9 @@ export default function FAQs() {
             <div className="p-5 space-y-6">
                 <div className="flex justify-between items-center flex-wrap gap-3">
                     <ol className="text-2xl font-semibold flex gap-2 items-center">
-                        <li>
-                            <Link to="/faq">FAQs</Link>
-                        </li>
+                        <li><Link to="/faq">FAQs</Link></li>
                     </ol>
-                    <Link
-                        to="/faq/add"
-                        className="bg-black text-white px-4 py-1.5 rounded hover:bg-black/70"
-                    >
+                    <Link to="/admin/faq/add" className="bg-black text-white px-4 py-1.5 rounded hover:bg-black/70">
                         <i className="fa-regular fa-plus mr-2"></i> Add New
                     </Link>
                 </div>
@@ -78,9 +77,7 @@ export default function FAQs() {
                     </div>
 
                     <div className="overflow-x-auto">
-                        <table
-                            className="min-w-full text-sm border rounded"
-                        >
+                        <table className="min-w-full text-sm border rounded">
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th className="border px-3 py-2">#</th>
@@ -93,24 +90,23 @@ export default function FAQs() {
                             </thead>
                             <tbody>
                                 {currentFaqs.map((faq, idx) => (
-                                    <tr
-                                        className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
-                                    >
+                                    <tr key={faq._id} className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
                                         <td className="border px-3 py-2">{startIndex + idx + 1}</td>
                                         <td className="border px-3 py-2">{faq.title}</td>
                                         <td className="border px-3 py-2">{faq.description}</td>
-                                        <td className="border px-3 py-2">{faq.createdAt}</td>
-                                        <td className="border px-3 py-2">{faq.updatedAt}</td>
+                                        <td className="border px-3 py-2">{new Date(faq.createdAt).toLocaleString()}</td>
+                                        <td className="border px-3 py-2">{new Date(faq.updatedAt).toLocaleString()}</td>
                                         <td className="border px-3 py-2">
                                             <div className="flex gap-2 text-white">
                                                 <Link
-                                                    to={`/faq/${faq.id}`}
+                                                    to={`/admin/faq/${faq._id}`}
                                                     className="bg-blue-600 p-1.5 rounded-md hover:bg-blue-800"
                                                 >
                                                     <FaEdit />
                                                 </Link>
+
                                                 <button
-                                                    onClick={() => alert('Delete clicked')}
+                                                    onClick={() => handleDelete(faq._id)}
                                                     className="bg-red-500 p-1.5 rounded-md hover:bg-red-700"
                                                 >
                                                     <FaTrash />

@@ -1,77 +1,97 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import axios from 'axios';
 import CommonLayout from '../../components/layout/CommonLayout';
+import { toast } from 'sonner';
 
 const modules = {
     toolbar: [
-      // Header options: h1, h2, h3, h4, h5, h6, and normal text (false)
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      // Font options (if needed)
-      [{ font: [] }],
-      // Size options (optional)
-      [{ size: ['small', false, 'large', 'huge'] }],
-      // Text formatting options
-      ['bold', 'italic', 'underline', 'strike'],
-      // List options
-      [{ list: 'ordered' }, { list: 'bullet' }],
-      // Indentation tools
-      [{ indent: '-1' }, { indent: '+1' }],
-      // Color options for text and background
-      [{ color: [] }, { background: [] }],
-      // Script (subscript/superscript)
-      [{ script: 'sub' }, { script: 'super' }],
-      // Other options like blockquote and code block
-      ['blockquote', 'code-block'],
-      // Alignment options
-      [{ align: [] }],
-      // Link and image insertion
-      ['link', 'image', 'video'],
-      // Clean formatting button
-      ['clean'],
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        [{ font: [] }],
+        [{ size: ['small', false, 'large', 'huge'] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        [{ indent: '-1' }, { indent: '+1' }],
+        [{ color: [] }, { background: [] }],
+        [{ script: 'sub' }, { script: 'super' }],
+        ['blockquote', 'code-block'],
+        [{ align: [] }],
+        ['link', 'image', 'video'],
+        ['clean'],
     ],
-  };
+};
 
-  const formats = [
+const formats = [
     'header', 'font', 'size', 'bold', 'italic', 'underline', 'strike',
     'list', 'bullet', 'indent', 'color', 'background', 'script',
     'blockquote', 'code-block', 'align', 'link', 'image', 'video',
-  ];
+];
+
+// Helper to map pathname to type and title
+const getPageInfo = (pathname) => {
+    switch (pathname) {
+        case '/admin/about': return { type: 'about', title: 'About Us' };
+        case '/admin/privacypolicy': return { type: 'privacypolicy', title: 'Privacy Policy' };
+        case '/admin/refundpolicy': return { type: 'refundpolicy', title: 'Refund Policy' };
+        case '/admin/termsAndConditions': return { type: 'termsAndConditions', title: 'Terms & Conditions' };
+        default: return { type: '', title: '' };
+    }
+};
 
 export default function AboutUs() {
-    const [content, setContent] = useState('<p><em><strong>Lorem is About content</strong></em></p>');
+    const [content, setContent] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const navigate = useNavigate();
+    const location = useLocation();
+
+    const { type, title: pageTitle } = getPageInfo(location.pathname);
+
+    // Fetch content on mount
+    useEffect(() => {
+        const fetchContent = async () => {
+            if (!type) return;
+            setLoading(true);
+            try {
+                const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/content/${type}`);
+                if (res.status === 200 && res.data) {
+                    setContent(res.data.content);
+                    toast.success('Content fetched successfully');
+                } else {
+                    setError(res.data.message || 'Failed to load content');
+                }
+            } catch (err) {
+                setError('Something went wrong');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchContent();
+    }, [type]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!type) return;
         setLoading(true);
         setError(null);
 
         try {
-            const res = await fetch('/admin/aboutus/update', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ about_content: content }),
+            const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/content/save`, {
+                type,
+                content,
             });
 
-            const data = await res.json();
-            console.log('Response data:', data);
-
-            if (res.ok) {
-                setContent('<p><em><strong>Lorem is About content</strong></em></p>');
-                navigate('/home');
+            if (res.status === 200) {
+                toast.success('Content saved successfully');
             } else {
-                setError(data.message || 'Failed to save content');
+                setError(res.data.message || 'Failed to save content');
             }
-
         } catch (err) {
-            console.error(err);
             setError('Something went wrong');
+            console.error(err);
         } finally {
             setLoading(false);
         }
@@ -81,14 +101,18 @@ export default function AboutUs() {
         <CommonLayout>
             <div className="p-5 space-y-6">
                 <div className="flex justify-between items-center flex-wrap gap-3">
-                    <h1 className="text-2xl font-semibold">
-                        <Link to="/admin/aboutus">About Us</Link>
-                    </h1>
+                    <h1 className="text-2xl font-semibold">{pageTitle}</h1>
                 </div>
 
                 <form onSubmit={handleSubmit} className="bg-white p-6 shadow rounded-md space-y-6">
                     <div>
-                        <ReactQuill theme="snow" value={content} onChange={setContent} modules={modules} formats={formats} />
+                        <ReactQuill
+                            theme="snow"
+                            value={content}
+                            onChange={setContent}
+                            modules={modules}
+                            formats={formats}
+                        />
                     </div>
 
                     {error && <p className="text-red-500">{error}</p>}

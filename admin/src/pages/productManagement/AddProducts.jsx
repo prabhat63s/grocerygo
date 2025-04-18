@@ -3,19 +3,27 @@ import { Link, useNavigate } from 'react-router-dom';
 import CommonLayout from '../../components/layout/CommonLayout';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import AddVariantsModal from '../../components/modals/AddVariantsModal';
+import { useProduct } from '../../hook/useProduct';
+import { useAuth } from '../../context/AuthContext';
+import useSubCategory from '../../hook/useSubCategory';
+import useCategory from '../../hook/useCategory';
+import useTax from '../../hook/useTax';
+import Select from "react-select";
+
 
 export default function AddProducts() {
+    const { createProduct } = useProduct();
+    const { categories } = useCategory();
+    const { subCategories } = useSubCategory();
+    const { token } = useAuth();
+    const navigate = useNavigate();
+    const { taxes } = useTax();
+    const [selectedTax, setSelectedTax] = useState([]);
+    // veg or non-veg
     const [itemType, setItemType] = useState(1);
-    const [hasExtras, setHasExtras] = useState(2); // 1 = Yes, 2 = No
-
-    // Fix: Ensure all extras have unique IDs
-    const [extras, setExtras] = useState([
-        { id: 1, name: 'Extra 1', price: 10 },
-        { id: 2, name: 'Extra 2', price: 20 },
-        { id: 3, name: 'Extra 3', price: 30 },
-        { id: 4, name: 'Extra 4', price: 40 },
-        { id: 5, name: 'Extra 5', price: 50 },
-    ]);
+    // has extra fields
+    const [hasExtras, setHasExtras] = useState(1);
+    const [extras, setExtras] = useState([]);
 
     const addExtra = () => {
         const nextId = extras.length ? Math.max(...extras.map(e => e.id)) + 1 : 1;
@@ -32,75 +40,110 @@ export default function AddProducts() {
         ));
     };
 
-    const handleGlobalExtras = () => {
-        alert('Global Extras modal triggered!');
+    const handleAddGlobalExtras = () => {
+        const globalExtras = [
+            { id: 1, name: 'Extra 1', price: 10 },
+            { id: 2, name: 'Extra 2', price: 20 },
+            { id: 3, name: 'Extra 3', price: 30 },
+            { id: 4, name: 'Extra 4', price: 40 },
+            { id: 5, name: 'Extra 5', price: 50 },
+        ];
+        setExtras([...extras, ...globalExtras]);
     };
+    // has variations
+    const [hasVariants, setHasVariants] = useState(1);
+    const [variants, setVariants] = useState([]);
 
-
-    const [hasVariants, setHasVariants] = useState(2); // 1 = Yes, 2 = No
     const [showStockFields, setShowStockFields] = useState(false);
     const [isvariantsModalOpen, setIsVariantsModalOpen] = useState(false);
     const [isVariantsVisible, setIsVariantsVisible] = useState(false);
 
-    const handleVariantToggle = (value) => {
-        setHasVariants(value);
-    };
-
-    const handleStockToggle = (value) => {
-        setShowStockFields(value === 1);
-    };
-
+    // Initialize form state with name, type,
+    const [formData, setFormData] = useState({
+        name: '',
+        type: '',
+        tax: [],
+    });
 
     const [images, setImages] = useState([]);
-    const [selectedTaxes, setSelectedTaxes] = useState([]);
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
         setImages(files);
     };
 
-    const handleTaxChange = (e) => {
-        const options = Array.from(e.target.selectedOptions).map((option) => parseInt(option.value));
-        setSelectedTaxes(options);
+    // Update formData when tax selection changes
+    const handleTaxChange = (selectedOptions) => {
+        // Map selected options to their values (tax IDs)
+        const selectedTaxIds = selectedOptions.map(option => option.value);
+
+        // Update the selected tax IDs and formData
+        setSelectedTax(selectedTaxIds);
+
+        // Update the formData tax field
+        setFormData({
+            ...formData,
+            tax: selectedTaxIds,  // Store the selected tax IDs in formData
+        });
     };
-
-
-    const [description, setDescription] = useState('');
-
-
-
-
-
-
-
-    // Initialize form state with name, type,
-    const [formData, setFormData] = useState({
-        name: '',
-        type: '',
-    });
-
-    const navigate = useNavigate();
 
     // Handle input changes for text and select inputs
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+        const { name, value, type } = e.target;
+        if (type === "select-multiple") {
+            const selectedValues = Array.from(e.target.selectedOptions, option => option.value);
+            setFormData({
+                ...formData,
+                [name]: selectedValues,
+            });
+        } else {
+            setFormData({
+                ...formData,
+                [name]: value,
+            });
+        }
     };
 
-    // Handle form submission; process form data and navigate back if needed
-    const handleSubmit = (e) => {
+    // Handle form submission
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Form Submitted:', formData);
-        // You can add your API call here before navigating
-        navigate('/admin/item');
-    };
 
-    // Handle cancel action
-    const handleCancel = () => {
-        navigate('/admin/item');
+        const form = new FormData();
+        form.append("name", formData.name);
+        form.append("sku", formData.sku || "");
+        form.append("videoURL", formData.videoURL || "");
+        form.append("category", formData.category);
+        form.append("subCategory", formData.subCategory || "");
+        form.append("type", itemType === 1 ? "veg" : "non-veg");
+
+        const actualExtras = hasExtras === 2 && extras.length > 0 ? extras : [];
+        form.append("hasExtras", actualExtras.length > 0);
+        form.append("extras", JSON.stringify(actualExtras));
+
+        const actualVariants = hasVariants === 2 && variants.length > 0 ? variants : [];
+        form.append("hasVariants", actualVariants.length > 0);
+        form.append("variants", JSON.stringify(actualVariants));
+
+        form.append("originalPrice", formData.originalPrice || 0);
+        form.append("sellingPrice", formData.sellingPrice || 0);
+
+        form.append("stockManagement", showStockFields);
+        form.append("stock", JSON.stringify([]));
+
+        form.append("description", formData.description);
+
+        // Append the selected taxes (which are stored in formData.tax)
+        form.append("tax", JSON.stringify(formData.tax));
+
+        images.forEach((file) => form.append("productImage", file));
+
+        try {
+            const result = await createProduct(form, token);
+            console.log("Created product:", result);
+            navigate("/admin/item");
+        } catch (err) {
+            console.error("Error creating product", err);
+        }
     };
 
     return (
@@ -127,17 +170,12 @@ export default function AddProducts() {
                                 required
                                 className="w-full mt-2 border border-gray-300 rounded px-3 py-1"
                             >
-                                <option value selected> Select</option>
-                                <option value={2} data-id={2}>Vegetables</option>
-                                <option value={3} data-id={3}>Condiments &amp; Spices</option>
-                                <option value={9} data-id={9}>Bread &amp; Bakery</option>
-                                <option value={5} data-id={5}>Beverage</option>
-                                <option value={8} data-id={8}>Snacks</option>
-                                <option value={6} data-id={6}>Dairy Products</option>
-                                <option value={7} data-id={7}>Meat</option>
-                                <option value={4} data-id={4}>Personal Care</option>
-                                <option value={1} data-id={1}>Fruits</option>
-                                <option value={10} data-id={10}>Cleaning Supplies</option>
+                                <option> Select</option>
+                                {categories.map((cat) => (
+                                    <option key={cat._id} value={cat._id}>
+                                        {cat.name}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
@@ -153,8 +191,12 @@ export default function AddProducts() {
                                 required
                                 className="w-full mt-2 border border-gray-300 rounded px-3 py-1"
                             >
-                                <option value selected> Select
-                                </option>
+                                <option> Select</option>
+                                {subCategories.map((cat) => (
+                                    <option key={cat._id} value={cat._id}>
+                                        {cat.name}
+                                    </option>
+                                ))}
 
                             </select>
                         </div>
@@ -230,11 +272,10 @@ export default function AddProducts() {
                             </label>
                             <input
                                 type="text"
-                                name="name"
+                                name="sku"
                                 placeholder="SKU"
-                                value={formData.name}
+                                value={formData.sku}
                                 onChange={handleInputChange}
-                                required
                                 className="w-full mt-2 border border-gray-300 rounded px-3 py-1"
                             />
                         </div>
@@ -246,11 +287,10 @@ export default function AddProducts() {
                             </label>
                             <input
                                 type="text"
-                                name="Video URL"
+                                name="videoURL"
                                 placeholder="Video URL"
                                 value={formData.videoURL}
                                 onChange={handleInputChange}
-                                required
                                 className="w-full mt-2 border border-gray-300 rounded px-3 py-1"
                             />
                         </div>
@@ -267,9 +307,9 @@ export default function AddProducts() {
                                         <input
                                             type="radio"
                                             name="has_extras"
-                                            value={2}
-                                            checked={hasExtras === 2}
-                                            onChange={() => setHasExtras(2)}
+                                            value={1}
+                                            checked={hasExtras === 1}
+                                            onChange={() => setHasExtras(1)}
                                             className="form-radio text-blue-600"
                                         />
                                         <span className="ml-2">No</span>
@@ -278,9 +318,9 @@ export default function AddProducts() {
                                         <input
                                             type="radio"
                                             name="has_extras"
-                                            value={1}
-                                            checked={hasExtras === 1}
-                                            onChange={() => setHasExtras(1)}
+                                            value={2}
+                                            checked={hasExtras === 2}
+                                            onChange={() => setHasExtras(2)}
                                             className="form-radio text-blue-600"
                                         />
                                         <span className="ml-2">Yes</span>
@@ -288,11 +328,11 @@ export default function AddProducts() {
                                 </div>
                             </div>
                             {/* Buttons */}
-                            {hasExtras === 1 && (
+                            {hasExtras === 2 && (
                                 <div className="flex gap-4 h-fit mt-2">
                                     <button
                                         type="button"
-                                        onClick={handleGlobalExtras}
+                                        onClick={handleAddGlobalExtras}
                                         className="bg-black text-white px-4 py-1.5 rounded hover:bg-neutral-700"
                                     >
                                         <i className="fas fa-plus mr-1" /> Add Global Extras
@@ -309,7 +349,7 @@ export default function AddProducts() {
                         </div>
 
                         {/* Extras Fields */}
-                        {hasExtras === 1 && (
+                        {hasExtras === 2 && (
                             <div className="space-y-3">
                                 {extras.map((extra) => (
                                     <div
@@ -356,9 +396,9 @@ export default function AddProducts() {
                                         <input
                                             type="radio"
                                             name="has_variants"
-                                            value={2}
-                                            checked={hasVariants === 2}
-                                            onChange={() => handleVariantToggle(2)}
+                                            value={1}
+                                            checked={hasVariants === 1}
+                                            onChange={() => setHasVariants(1)}
                                         />
                                         No
                                     </label>
@@ -366,16 +406,16 @@ export default function AddProducts() {
                                         <input
                                             type="radio"
                                             name="has_variants"
-                                            value={1}
-                                            checked={hasVariants === 1}
-                                            onChange={() => handleVariantToggle(1)}
+                                            value={2}
+                                            checked={hasVariants === 2}
+                                            onChange={() => setHasVariants(2)}
                                         />
                                         Yes
                                     </label>
                                 </div>
                             </div>
 
-                            {hasVariants === 1 && (<button
+                            {hasVariants === 2 && (<button
                                 type="button"
                                 onClick={() => setIsVariantsModalOpen(true)}
                                 className="bg-yellow-500 text-white px-2 py-1.5 rounded hover:bg-yellow-600"
@@ -384,7 +424,7 @@ export default function AddProducts() {
                             </button>)}
                         </div>
 
-                        {hasVariants === 2 && (
+                        {hasVariants === 1 && (
                             <>
                                 <div className="grid md:grid-cols-2 gap-4 mt-4">
                                     <div>
@@ -393,9 +433,11 @@ export default function AddProducts() {
                                         </label>
                                         <input
                                             type="number"
-                                            name="original_price"
-                                            placeholder="Original Price"
+                                            name="originalPrice"
+                                            value={formData.originalPrice}
+                                            onChange={handleInputChange}
                                             className="w-full border border-gray-300 px-2 py-1.5 rounded"
+                                            placeholder="Original Price"
                                         />
                                     </div>
                                     <div>
@@ -404,8 +446,10 @@ export default function AddProducts() {
                                         </label>
                                         <input
                                             type="number"
+                                            name="sellingPrice"
+                                            value={formData.sellingPrice}
+                                            onChange={handleInputChange}
                                             className="w-full border border-gray-300 px-2 py-1.5 rounded"
-                                            name="price"
                                             placeholder="Selling Price"
                                         />
                                     </div>
@@ -417,9 +461,9 @@ export default function AddProducts() {
                                                 <input
                                                     type="radio"
                                                     name="has_stock"
-                                                    value={2}
+                                                    value={1}
                                                     defaultChecked
-                                                    onChange={() => handleStockToggle(2)}
+                                                    onChange={() => setShowStockFields(1)}
                                                 />
                                                 No
                                             </label>
@@ -427,8 +471,8 @@ export default function AddProducts() {
                                                 <input
                                                     type="radio"
                                                     name="has_stock"
-                                                    value={1}
-                                                    onChange={() => handleStockToggle(1)}
+                                                    value={2}
+                                                    onChange={() => setShowStockFields(2)}
                                                 />
                                                 Yes
                                             </label>
@@ -557,18 +601,16 @@ export default function AddProducts() {
                         {/* Tax Selection */}
                         <div>
                             <label className="block text-sm font-medium">Tax</label>
-                            <select
-                                name="tax"
-                                // value={formData.category}
-                                // onChange={handleInputChange}
-                                required
-                                className="w-full mt-2 border border-gray-300 rounded px-3 py-1"
-                            >
-                                <option value selected> Select</option>
-
-                                <option value={8}>SGST</option>
-                                <option value={9}>CGST</option>
-                            </select>
+                            <Select
+                                isMulti
+                                options={taxes.map((tax) => ({
+                                    value: tax._id,
+                                    label: tax.name,
+                                }))}
+                                value={taxes.filter((tax) => selectedTax.includes(tax._id))}
+                                onChange={handleTaxChange} 
+                                className="w-full"
+                            />
                         </div>
                     </div>
 
@@ -582,17 +624,15 @@ export default function AddProducts() {
                             rows={5}
                             placeholder="Description"
                             className="w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
+                            value={formData.description}
+                            onChange={handleInputChange}
                         />
                     </div>
-
-
 
                     <div className="flex justify-end gap-4 mt-6">
                         <button
                             type="button"
-                            onClick={handleCancel}
+                            onClick={() => navigate('/admin/item')}
                             className="bg-red-500 text-white px-4 py-2 rounded"
                         >
                             Cancel

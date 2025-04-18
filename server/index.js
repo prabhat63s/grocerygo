@@ -10,6 +10,9 @@ import productRoutes from './routes/productRoutes.js';
 import taxRoutes from './routes/taxRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import whyChooseUsRoutes from './routes/whyChooseUsRoutes.js';
+import pagesRoutes from './routes/pagesRoutes.js';
+import faqRoutes from './routes/faqRoutes.js';
+import galleryRoutes from './routes/galleryRoutes.js';
 
 // Configure environment variables
 dotenv.config();
@@ -39,6 +42,9 @@ app.use("/api/products", productRoutes);
 app.use('/api/taxes', taxRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/why-choose-us", whyChooseUsRoutes);
+app.use("/api/content", pagesRoutes);
+app.use('/api/faq', faqRoutes);
+app.use('/api/gallery', galleryRoutes);
 
 // Start the server
 app.listen(PORT, () => {

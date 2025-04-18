@@ -1,13 +1,31 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import axios from 'axios';
 import CommonLayout from '../../components/layout/CommonLayout';
+import { toast } from 'sonner';
 
 export default function AddFAQ() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = !!id;
+
   const [formData, setFormData] = useState({
     title: '',
     description: ''
   });
+
+  useEffect(() => {
+    if (isEditMode) {
+      axios.get(`${import.meta.env.VITE_BASE_URL}/faq/${id}`)
+        .then(res => {
+          setFormData(res.data);
+        })
+        .catch(err => {
+          console.error('Fetch error:', err);
+          alert('Failed to load FAQ');
+        });
+    }
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -16,21 +34,20 @@ export default function AddFAQ() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const res = await fetch('/admin/faq/store', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+    const endpoint = isEditMode ? `${import.meta.env.VITE_BASE_URL}/faq/${id}` : `${import.meta.env.VITE_BASE_URL}/faq/create`;
 
-      if (res.ok) {
-        navigate('/faq');
+    try {
+      if (isEditMode) {
+        await axios.put(endpoint, formData);
+        toast.success('FAQ update successfully');
       } else {
-        alert('Failed to save FAQ');
+        await axios.post(endpoint, formData);
+        toast.error('FAQ saved successfully');
       }
+      navigate('/admin/faq');
     } catch (err) {
-      console.error(err);
-      alert('Something went wrong');
+      console.error('Submit error:', err);
+      alert('Failed to save FAQ');
     }
   };
 
@@ -41,32 +58,34 @@ export default function AddFAQ() {
           <ol className="text-2xl font-semibold flex gap-2 items-center">
             <li><Link to="/admin/faq" className="">FAQs</Link></li>
             <li>/</li>
-            <li className="">Add New</li>
+            <li className="">{isEditMode ? 'Edit FAQ' : 'Add New'}</li>
           </ol>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white shadow p-6 rounded-md space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium mb-1">Title <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium mb-1">
+                Title <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
                 required
-                placeholder="Title"
                 className="w-full border px-4 py-2 rounded-md"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Description <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium mb-1">
+                Description <span className="text-red-500">*</span>
+              </label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
                 rows="5"
-                placeholder="Description"
                 required
                 className="w-full border px-4 py-2 rounded-md"
               />
@@ -74,14 +93,11 @@ export default function AddFAQ() {
           </div>
 
           <div className="text-end space-x-4">
-            <Link to="/admin/faq" className="bg-red-500 text-white px-5 py-2 rounded-md hover:bg-red-600">
+            <Link to="/faq" className="bg-red-500 text-white px-5 py-2 rounded-md hover:bg-red-600">
               Cancel
             </Link>
-            <button
-              type="submit"
-              className="bg-black text-white px-5 py-2 rounded-md hover:bg-neutral-700"
-            >
-              Save
+            <button type="submit" className="bg-black text-white px-5 py-2 rounded-md hover:bg-neutral-700">
+              {isEditMode ? 'Update' : 'Save'}
             </button>
           </div>
         </form>

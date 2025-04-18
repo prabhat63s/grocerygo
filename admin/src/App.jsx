@@ -48,9 +48,6 @@ import AddEmployeeRoles from './pages/employeeManagement/AddEmployeeRoles';
 import Employee from './pages/employeeManagement/Employee';
 import AddEmployee from './pages/employeeManagement/AddEmployee';
 import AboutUs from './pages/systemSettings/AboutUs';
-import RefundPolicy from './pages/systemSettings/RefundPolicy';
-import TermsConditions from './pages/systemSettings/TermsConditions';
-import PrivacyPolicy from './pages/systemSettings/PrivacyPolicy';
 import Blogs from './pages/systemSettings/Blogs';
 import EmailSubscribers from './pages/systemSettings/EmailSubscribers';
 import Share from './pages/systemSettings/Share';
@@ -139,7 +136,7 @@ export default function App() {
             <Route path="banner/:id" element={<Banner />} />
             <Route path="banner/:id/add" element={<AddBanner />} />
             <Route path="promocode">
-              <Route index element={<Slider />} />
+              <Route index element={<Coupons />} />
               <Route path="add" element={<AddCoupons />} />
               <Route path=":id" element={<AddCoupons />} />
             </Route>
@@ -194,10 +191,7 @@ export default function App() {
             </Route>
 
             {/* System Settings */}
-            <Route path="aboutus" element={<AboutUs />} />
-            <Route path="privacypolicy" element={<PrivacyPolicy />} />
-            <Route path="refundpolicy" element={<RefundPolicy />} />
-            <Route path="termscondition" element={<TermsConditions />} />
+            <Route path=":id" element={<AboutUs />} />
             <Route path="blogs">
               <Route index element={<Blogs />} />
               <Route path="add" element={<AddBlog />} />

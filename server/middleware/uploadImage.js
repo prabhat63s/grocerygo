@@ -16,6 +16,8 @@ const storage = multer.diskStorage({
       uploadPath = "uploads/products/";
     } else if (req.baseUrl.includes("why-choose-us")) {
       uploadPath = "uploads/whychooseus/";
+    } else if (req.baseUrl.includes("gallery")) {
+      uploadPath = "uploads/gallery/";
     }
 
 

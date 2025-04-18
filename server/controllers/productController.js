@@ -18,12 +18,11 @@ export const createProduct = async (req, res) => {
       return res.status(400).json({ message: "Name, category, type, prices and at least one image are required." });
     }
 
-    let parsedExtras = [], parsedVariants = [], parsedStockManagement = [], parsedTax = [];
+    let parsedExtras = [], parsedVariants = [], parsedStockManagement = [];
     try {
       parsedExtras = extras ? JSON.parse(extras) : [];
       parsedVariants = variants ? JSON.parse(variants) : [];
       parsedStockManagement = stock ? JSON.parse(stock) : [];
-      parsedTax = tax ? Array.isArray(tax) ? tax : [tax] : [];
     } catch (err) {
       return res.status(400).json({ message: "Invalid JSON format in extras, variants, or stock." });
     }
@@ -34,19 +33,27 @@ export const createProduct = async (req, res) => {
       return res.status(400).json({ message: "Product already exists" });
     }
 
-    // Convert category to ObjectId if it's a string
-    let parsedCategory = category;
-    if (typeof category === "string") {
-      parsedCategory = new mongoose.Types.ObjectId(category);
-    }
+    const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+    const categoryId = isValidObjectId(category) ? new mongoose.Types.ObjectId(category) : null;
+    const subCategoryId = isValidObjectId(subCategory) ? new mongoose.Types.ObjectId(subCategory) : null;
 
+
+    let taxIds = [];
+    try {
+      const parsedTax = typeof tax === "string" ? JSON.parse(tax) : tax;
+      if (Array.isArray(parsedTax)) {
+        taxIds = parsedTax.filter(id => mongoose.Types.ObjectId.isValid(id)).map(id => new mongoose.Types.ObjectId(id));
+      }
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid tax format" });
+    }
 
     const product = new Product({
       name: normalizedName,
       sku,
       videoURL,
-      category: parsedCategory,
-      subCategory,
+      category: categoryId,
+      subCategory: subCategoryId,
       type,
       hasExtras,
       extras: parsedExtras,
@@ -57,12 +64,21 @@ export const createProduct = async (req, res) => {
       stockManagement,
       stock: parsedStockManagement,
       description,
-      tax: parsedTax,
+      tax: taxIds,
       productImage
     });
 
-    await product.save();
-    res.status(201).json({ message: "Product created", product });
+    // Save product first!
+    const createdProduct = await product.save();
+
+    // Then fetch and populate
+    const savedProduct = await Product.findById(createdProduct._id)
+      .populate('category')
+      .populate('subCategory')
+      .populate('tax');
+
+    res.status(201).json({ message: "Product created", product: savedProduct });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
@@ -72,7 +88,7 @@ export const createProduct = async (req, res) => {
 // Get all products
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate("category").populate("subCategory").populate("tax");
+    const products = await Product.find().populate("category", "name").populate("subCategory", "name").populate("tax");
 
     const total = await Product.countDocuments();
     res.json({ total, products });
