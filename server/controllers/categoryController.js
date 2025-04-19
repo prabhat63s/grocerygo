@@ -64,10 +64,6 @@ export const updateCategory = async (req, res) => {
     try {
         const { name, status } = req.body;
         const domainName = req.protocol + "://" + req.get("host");
-
-        // Log req.file to check if file is uploaded
-        console.log("Uploaded File:", req.file);
-
         const categoryImage = req.file ? `${domainName}/uploads/categories/${req.file.filename}` : null;
 
         const category = await Category.findById(req.params.id);

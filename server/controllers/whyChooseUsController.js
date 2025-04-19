@@ -6,9 +6,9 @@ export const createWhyChooseUs = async (req, res) => {
     const { title, subTitle, description } = req.body;
     const domainName = req.protocol + "://" + req.get("host");
 
-    const image = req.file ? `${domainName}/uploads/whychooseus/${req.file.filename}` : "";
+    const whyChooseUsImage = req.file ? `${domainName}/uploads/whychooseus/${req.file.filename}` : "";
 
-    if (!image) {
+    if (!whyChooseUsImage) {
       return res.status(400).json({ message: "Image upload failed or missing." });
     }
 
@@ -16,7 +16,7 @@ export const createWhyChooseUs = async (req, res) => {
       title,
       subTitle,
       description,
-      image,
+      whyChooseUsImage,
     });
 
     await newItem.save();
@@ -54,7 +54,7 @@ export const updateWhyChooseUs = async (req, res) => {
     const { title, subTitle, description } = req.body;
     const domainName = req.protocol + "://" + req.get("host");
 
-    const image = req.file ? `${domainName}/uploads/whychooseus/${req.file.filename}` : null;
+    const whyChooseUsImage = req.file ? `${domainName}/uploads/chooseUsUI/${req.file.filename}` : null;
 
     const item = await WhyChooseUs.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Item not found" });
@@ -62,7 +62,7 @@ export const updateWhyChooseUs = async (req, res) => {
     item.title = title || item.title;
     item.subTitle = subTitle || item.subTitle;
     item.description = description || item.description;
-    if (image) item.image = image;
+    if (whyChooseUsImage) item.whyChooseUsImage = whyChooseUsImage;
 
     await item.save();
     res.status(200).json({ message: "WhyChooseUs updated", item });

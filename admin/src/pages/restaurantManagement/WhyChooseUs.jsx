@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import CommonLayout from "../../components/layout/CommonLayout";
 import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import ChooseUsUI from "./ChooseUsUI";
 
 export default function WhyChooseUs() {
     const [search, setSearch] = useState("");
@@ -54,72 +55,7 @@ export default function WhyChooseUs() {
                 </div>
 
                 {/* Form */}
-                <form className="bg-gray-50 shadow rounded-lg p-6 space-y-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                                Title <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="title"
-                                placeholder="Title"
-                                defaultValue="Why Choose Us!"
-                                required
-                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring focus:ring-blue-200"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                                Subtitle <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="subtitle"
-                                placeholder="Subtitle"
-                                defaultValue="Best Online Grocery Product Selling E-commerce Platform"
-                                required
-                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring focus:ring-blue-200"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                                Image <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="file"
-                                name="image"
-                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                            />
-                            <img
-                                src="https://grocerygo.infotechgravity.com/storage/app/public/admin-assets/images/index/choose-66712da93b9f0.webp"
-                                alt="preview"
-                                className="mt-2 w-24 h-24 rounded object-cover"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                                Description <span className="text-red-500">*</span>
-                            </label>
-                            <textarea
-                                name="description"
-                                rows="5"
-                                required
-                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 resize-none focus:ring focus:ring-blue-200"
-                                placeholder="Description"
-                                defaultValue="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,"
-                            />
-                        </div>
-                    </div>
-                    <div className="text-right">
-                        <button
-                            type="submit"
-                            className="bg-black hover:bg-neutral-700 text-white px-6 py-2 rounded"
-                        >
-                            Save
-                        </button>
-                    </div>
-                </form>
+               <ChooseUsUI />
 
                 {/* Table Actions */}
                 <div className="p-4 bg-gray-50 rounded-md shadow">

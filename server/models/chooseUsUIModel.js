@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const whyChooseUsSchema = new mongoose.Schema({
+const chooseUsUiSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
@@ -16,10 +16,10 @@ const whyChooseUsSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
-    image: {
+    chooseUsUiImage: {
         type: String,
         required: true,
     },
 },{timestamps: true});
 
-export default mongoose.model("WhyChooseUs", whyChooseUsSchema);
+export default mongoose.model("ChooseUsUi", chooseUsUiSchema);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FaFacebookSquare,
   FaYoutube,
@@ -9,65 +9,50 @@ import {
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import CommonLayout from '../../components/layout/CommonLayout';
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
 
 export default function OurTeam() {
-  const initialTeam = [
-    {
-      id: 1,
-      name: 'Diana R Wilmot',
-      designation: 'Tradewell',
-      socialLinks: {
-        facebook: 'https://www.facebook.com/',
-        youtube: 'https://www.instagram.com/',
-        instagram: 'https://www.google.com/',
-      },
-      createdDate: 'Jul 29, 2024 01:27 AM',
-      updatedDate: 'Jul 29, 2024 01:27 AM',
-    },
-    {
-      id: 2,
-      name: 'Hector L Holst',
-      designation: 'Webcom Business Services',
-      socialLinks: {
-        facebook: 'https://www.facebook.com/',
-        youtube: 'https://www.instagram.com/',
-        instagram: 'https://www.google.com/',
-      },
-      createdDate: 'Jul 29, 2024 01:26 AM',
-      updatedDate: 'Jul 29, 2024 01:26 AM',
-    },
-    {
-      id: 3,
-      name: 'Donald W Hembree',
-      designation: 'Health Educator',
-      socialLinks: {
-        facebook: 'https://www.facebook.com/',
-        youtube: 'https://www.instagram.com/',
-        instagram: 'https://www.google.com/',
-      },
-      createdDate: 'Jul 29, 2024 01:25 AM',
-      updatedDate: 'Jul 29, 2024 01:25 AM',
-    },
-    {
-      id: 4,
-      name: 'James K Taber',
-      designation: 'Legal Adviser',
-      socialLinks: {
-        facebook: 'https://www.facebook.com/',
-        youtube: 'https://www.youtube.com/',
-        instagram: 'https://www.instagram.com/',
-      },
-      createdDate: 'Jan 04, 2023 12:35 PM',
-      updatedDate: 'Jul 29, 2024 01:25 AM',
-    },
-  ];
+  const [teamImage, setTeamImage] = useState([]);
+  const { token } = useAuth();
+
+  const fetchTeam = async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/team`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setTeamImage(res.data);
+    } catch (error) {
+      console.error('Failed to fetch team:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTeam();
+  }, [token]);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this member?')) return;
+    try {
+      await axios.delete(`${import.meta.env.VITE_BASE_URL}/team/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      fetchTeam(); // Refresh the list
+    } catch (error) {
+      console.error('Delete failed:', error);
+    }
+  };
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 2;
+  const itemsPerPage = 5;
 
-  const filteredTeam = initialTeam.filter((member) =>
-    member.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTeam = teamImage.filter((member) =>
+    member.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredTeam.length / itemsPerPage);
@@ -89,7 +74,7 @@ export default function OurTeam() {
         <div className="flex justify-between items-center flex-wrap gap-3">
           <h1 className="text-2xl font-semibold">Our Team</h1>
           <Link
-            to="/our-team/add"
+            to="/admin/our-team/add"
             className="bg-black text-white px-4 py-2 rounded hover:bg-neutral-700 flex items-center gap-2"
           >
             <FaPlus /> Add New
@@ -115,7 +100,7 @@ export default function OurTeam() {
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
-                  setCurrentPage(1); // Reset page on search
+                  setCurrentPage(1);
                 }}
               />
             </div>
@@ -129,8 +114,8 @@ export default function OurTeam() {
                   <th className="border px-3 py-2 text-left">Name</th>
                   <th className="border px-3 py-2 text-left">Designation</th>
                   <th className="border px-3 py-2 text-left">Social Links</th>
-                  <th className="border px-3 py-2 text-left">Created Date</th>
-                  <th className="border px-3 py-2 text-left">Updated Date</th>
+                  <th className="border px-3 py-2 text-left">Created</th>
+                  <th className="border px-3 py-2 text-left">Updated</th>
                   <th className="border px-3 py-2 text-left">Action</th>
                 </tr>
               </thead>
@@ -143,50 +128,56 @@ export default function OurTeam() {
                   </tr>
                 ) : (
                   paginatedTeam.map((member, index) => (
-                    <tr key={member.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                    <tr key={member._id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
                       <td className="border px-3 py-2">{startIndex + index + 1}</td>
                       <td className="border px-3 py-2">{member.name}</td>
                       <td className="border px-3 py-2">{member.designation}</td>
                       <td className="border px-3 py-2">
                         <div className="flex gap-2">
-                          <a
-                            href={member.socialLinks.facebook}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:scale-110"
-                          >
-                            <FaFacebookSquare />
-                          </a>
-                          <a
-                            href={member.socialLinks.youtube}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-red-500 hover:scale-110"
-                          >
-                            <FaYoutube />
-                          </a>
-                          <a
-                            href={member.socialLinks.instagram}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-pink-500 hover:scale-110"
-                          >
-                            <FaInstagramSquare />
-                          </a>
+                          {member.facebook && (
+                            <a
+                              href={member.facebook}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:scale-110"
+                            >
+                              <FaFacebookSquare />
+                            </a>
+                          )}
+                          {member.youtube && (
+                            <a
+                              href={member.youtube}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-red-500 hover:scale-110"
+                            >
+                              <FaYoutube />
+                            </a>
+                          )}
+                          {member.instagram && (
+                            <a
+                              href={member.instagram}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-pink-500 hover:scale-110"
+                            >
+                              <FaInstagramSquare />
+                            </a>
+                          )}
                         </div>
                       </td>
-                      <td className="border px-3 py-2">{member.createdDate}</td>
-                      <td className="border px-3 py-2">{member.updatedDate}</td>
+                      <td className="border px-3 py-2">{new Date(member.createdAt).toLocaleString()}</td>
+                      <td className="border px-3 py-2">{new Date(member.updatedAt).toLocaleString()}</td>
                       <td className="border px-3 py-2">
                         <div className="flex gap-2">
                           <Link
-                            to={`/our-team/${member.id}`}
+                            to={`/admin/our-team/${member._id}`}
                             className="bg-blue-500 hover:bg-blue-600 text-white p-1.5 rounded"
                           >
                             <FaEdit />
                           </Link>
                           <button
-                            onClick={() => alert('Delete action')}
+                            onClick={() => handleDelete(member._id)}
                             className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded"
                           >
                             <FaTrash />

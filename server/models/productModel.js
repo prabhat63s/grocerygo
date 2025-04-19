@@ -38,7 +38,7 @@ const variantSchema = new mongoose.Schema({
     lowQtyWarning: {
         type: Number
     },
-    manageStock: {
+    stockManagement: {
         type: Boolean,
         default: false
     },

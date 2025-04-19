@@ -14,10 +14,14 @@ const storage = multer.diskStorage({
       uploadPath = "uploads/categories/";
     } else if (req.baseUrl.includes("products")) {
       uploadPath = "uploads/products/";
+    } else if (req.baseUrl.includes("chooseUsUi")) {
+      uploadPath = "uploads/chooseUsUi/";
     } else if (req.baseUrl.includes("why-choose-us")) {
       uploadPath = "uploads/whychooseus/";
     } else if (req.baseUrl.includes("gallery")) {
       uploadPath = "uploads/gallery/";
+    } else if (req.baseUrl.includes("team")) {
+      uploadPath = "uploads/team/";
     }
 
 
@@ -42,7 +46,7 @@ export const uploadImage = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
   fileFilter: (req, file, cb) => {
-    const fileTypes = /jpeg|jpg|png/;
+    const fileTypes = /webp|jpeg|jpg|png/;
     const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = fileTypes.test(file.mimetype);
     if (mimetype && extname) {
