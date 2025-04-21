@@ -608,7 +608,7 @@ export default function AddProducts() {
                                     label: tax.name,
                                 }))}
                                 value={taxes.filter((tax) => selectedTax.includes(tax._id))}
-                                onChange={handleTaxChange} 
+                                onChange={handleTaxChange}
                                 className="w-full"
                             />
                         </div>

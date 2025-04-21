@@ -22,6 +22,14 @@ const storage = multer.diskStorage({
       uploadPath = "uploads/gallery/";
     } else if (req.baseUrl.includes("team")) {
       uploadPath = "uploads/team/";
+    } else if (req.baseUrl.includes("blogs")) {
+      uploadPath = "uploads/blogs/";
+    } else if (req.baseUrl.includes("tutorial")) {
+      uploadPath = "uploads/tutorial/";
+    } else if (req.baseUrl.includes("banner")) {
+      uploadPath = "uploads/banner/";
+    } else if (req.baseUrl.includes("sliders")) {
+      uploadPath = "uploads/sliders/";
     }
 
 

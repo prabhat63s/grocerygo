@@ -17,7 +17,7 @@ const couponSchema = new mongoose.Schema({
     },
     usageType: {
         type: String,
-        enum: ["single", "multiple"],
+        enum: ["limited", "unLimited"],
         required: true,
     },
     code: {

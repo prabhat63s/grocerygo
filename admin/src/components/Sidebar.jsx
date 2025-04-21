@@ -139,16 +139,16 @@ export default function Sidebar({ setOpenSidebar }) {
                     <div
                         className="pl-4 flex flex-col gap-2 transform transition-all duration-300 ease-out animate-slideDown"
                     >
-                        <Link to='/admin/banner/bannersection-1' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner/bannersection-1' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                        <Link to='/admin/banner-section-1' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner-section-1' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                             <div className="flex gap-2 items-center"><GoDotFill />Banner Section 1</div>
                         </Link>
-                        <Link to='/admin/banner/bannersection-2' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner/bannersection-2' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                        <Link to='/admin/banner-section-2' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner-section-2' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                             <div className="flex gap-2 items-center"><GoDotFill />Banner Section 2</div>
                         </Link>
-                        <Link to='/admin/banner/bannersection-3' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner/bannersection-3' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                        <Link to='/admin/banner-section-3' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner-section-3' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                             <div className="flex gap-2 items-center"><GoDotFill />Banner Section 3</div>
                         </Link>
-                        <Link to='/admin/banner/bannersection-4' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner/bannersection-4' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                        <Link to='/admin/banner-section-4' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner-section-4' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                             <div className="flex gap-2 items-center"><GoDotFill />Banner Section 4</div>
                         </Link>
                     </div>

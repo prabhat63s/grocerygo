@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CommonLayout from '../../components/layout/CommonLayout';
+import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
+import useCategory from '../../hook/useCategory';
+import { useProduct } from '../../hook/useProduct';
 
 export default function AddSlider() {
+    const { categories } = useCategory();
+    const { products } = useProduct();
     const [type, setType] = useState('');
     const [formData, setFormData] = useState({
         title: '',
@@ -110,16 +116,11 @@ export default function AddSlider() {
                                         className="w-full border rounded px-3 py-2 bg-white"
                                     >
                                         <option value="">Select</option>
-                                        <option value="2">Vegetables</option>
-                                        <option value="3">Condiments & Spices</option>
-                                        <option value="9">Bread & Bakery</option>
-                                        <option value="5">Beverage</option>
-                                        <option value="8">Snacks</option>
-                                        <option value="6">Dairy Products</option>
-                                        <option value="7">Meat</option>
-                                        <option value="4">Personal Care</option>
-                                        <option value="1">Fruits</option>
-                                        <option value="10">Cleaning Supplies</option>
+                                        {categories.map(cat => (
+                                            <option key={cat._id} value={cat._id}>
+                                                {cat.name}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
                             )}
@@ -137,15 +138,11 @@ export default function AddSlider() {
                                         className="w-full border rounded px-3 py-2 bg-white"
                                     >
                                         <option value="">Select</option>
-                                        <option value="32">Nescafe Classic Instant Coffee</option>
-                                        <option value="31">Banana Chips - 170 g</option>
-                                        <option value="30">Lay's Magic Masala Chips</option>
-                                        <option value="29">Uncle Chipps Spicy Treat</option>
-                                        <option value="28">Kurkure Masala Munch</option>
-                                        <option value="26">Meatzza Chicken Wings</option>
-                                        <option value="27">Chicken Wings - 500gm</option>
-                                        <option value="20">Hide & Seek Cookies</option>
-                                        <option value="41">Amul Full Cream Milk</option>
+                                        {products?.map(prod => (
+                                            <option key={prod._id} value={prod._id}>
+                                                {prod.name}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
                             )}

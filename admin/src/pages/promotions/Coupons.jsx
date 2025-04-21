@@ -1,49 +1,49 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CommonLayout from '../../components/layout/CommonLayout';
 import { FaCheck, FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Coupons() {
-    const initialCoupons = [
-        {
-            id: '1',
-            title: 'Every Friday 20% Discounts',
-            couponCode: 'FRD20',
-            discount: '20%',
-            status: 'active',
-            createdDate: 'May 20, 2024 10:26 AM',
-            updatedDate: 'Jan 28, 2025 12:19 AM'
-        },
-        {
-            id: '2',
-            title: 'First Grocery Online Order 25% Off',
-            couponCode: 'FIRST25',
-            discount: '25%',
-            status: 'active',
-            createdDate: 'Jun 14, 2024 09:39 AM',
-            updatedDate: 'Jan 28, 2025 12:19 AM'
-        },
-        {
-            id: '3',
-            title: 'Unlock The Magic 50% Offer',
-            couponCode: 'MEGA30',
-            discount: '50%',
-            status: 'active',
-            createdDate: 'Jun 10, 2024 09:59 AM',
-            updatedDate: 'Jan 28, 2025 12:19 AM'
-        },
-        {
-            id: '4',
-            title: 'Excellent Offer For Shop',
-            couponCode: 'OFF10',
-            discount: '10%',
-            status: 'active',
-            createdDate: 'Aug 25, 2022 07:34 PM',
-            updatedDate: 'Jan 28, 2025 12:19 AM'
-        }
-    ];
+    const { token } = useAuth();
+    const [coupons, setCoupons] = useState([]);
 
-    const [coupons, setCoupons] = useState(initialCoupons);
+    // --- Fetch from /api/Coupons ---
+    const fetchCoupons = async () => {
+        if (!token) return;
+        try {
+            const res = await axios.get(
+                `${import.meta.env.VITE_BASE_URL}/coupons`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            // Handle either an array or { data: [...] }
+            const data = Array.isArray(res.data) ? res.data : res.data.data;
+            setCoupons(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error('Failed to fetch Coupons:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchCoupons();
+    }, [token]);
+
+    // --- Delete handler ---
+    const handleDelete = async (id) => {
+        if (!token) return;
+        try {
+            await axios.delete(
+                `${import.meta.env.VITE_BASE_URL}/coupons/${id}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            fetchCoupons();
+        } catch (error) {
+            console.error('Delete failed:', error);
+        }
+    };
+
+
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
@@ -114,26 +114,26 @@ export default function Coupons() {
                             <tbody
                             >
                                 {currentCoupons.map((coupon, idx) => (
-                                    <tr
+                                    <tr key={idx}
                                         className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
                                     >
                                         <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
                                         <td className="border px-4 py-2">{coupon.title}</td>
-                                        <td className="border px-4 py-2">{coupon.couponCode}</td>
+                                        <td className="border px-4 py-2">{coupon.code}</td>
                                         <td className="border px-4 py-2">{coupon.discount}</td>
                                         <td className="border px-4 py-2">
                                             <span className="bg-green-500 text-white text-xs inline-flex items-center justify-center p-1.5 rounded">
                                                 <FaCheck className="text-sm" />
                                             </span>
                                         </td>
-                                        <td className="border px-4 py-2">{coupon.createdDate}</td>
-                                        <td className="border px-4 py-2">{coupon.updatedDate}</td>
+                                        <td className="border px-3 py-2">{new Date(coupon.createdAt || coupon.created).toLocaleString()}</td>
+                                        <td className="border px-3 py-2">{new Date(coupon.updatedAt || coupon.updated).toLocaleString()}</td>
                                         <td className="border px-4 py-2 text-white">
                                             <div className="flex items-center gap-2">
-                                                <Link to={`/admin/coupon-${coupon.id}`} className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
+                                                <Link to={`/admin/promocode/${coupon._id}`} className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
                                                     <FaEdit />
                                                 </Link>
-                                                <button className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
+                                                <button onClick={() => handleDelete(coupon._id)} className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
                                                     <FaTrash />
                                                 </button>
                                             </div>

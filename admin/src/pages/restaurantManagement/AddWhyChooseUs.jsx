@@ -1,15 +1,42 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import CommonLayout from '../../components/layout/CommonLayout';
+import { useAuth } from '../../context/AuthContext';
 
 export default function AddWhyChooseUs() {
+    const { id } = useParams();
+    const { token } = useAuth();
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({
         title: '',
-        subtitle: '',
-        image: null,
+        subTitle: '',
+        whyChooseUsContentImage: null,
     });
 
-    const navigate = useNavigate();
+    const [existingImage, setExistingImage] = useState('');
+    const isEditMode = Boolean(id);
+
+    useEffect(() => {
+        if (isEditMode) {
+            const fetchData = async () => {
+                try {
+                    const res = await fetch(`${import.meta.env.VITE_BASE_URL}/why-choose-us/${id}`);
+                    const data = await res.json();
+                    setFormData({
+                        title: data.title || '',
+                        subTitle: data.subTitle || '',
+                        whyChooseUsContentImage: null,
+                    });
+                    setExistingImage(data.whyChooseUsContentImage || '');
+                } catch (err) {
+                    console.error('Failed to fetch data:', err);
+                }
+            };
+
+            fetchData();
+        }
+    }, [id, isEditMode]);
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
@@ -23,17 +50,27 @@ export default function AddWhyChooseUs() {
         e.preventDefault();
         const form = new FormData();
         form.append('title', formData.title);
-        form.append('subtitle', formData.subtitle);
-        form.append('image', formData.image);
+        form.append('subTitle', formData.subTitle);
+        if (formData.whyChooseUsContentImage) {
+            form.append('whyChooseUsContentImage', formData.whyChooseUsContentImage);
+        }
+
+        const url = isEditMode
+            ? `${import.meta.env.VITE_BASE_URL}/why-choose-us/${id}`
+            : `${import.meta.env.VITE_BASE_URL}/why-choose-us`;
+        const method = isEditMode ? 'PUT' : 'POST';
 
         try {
-            const response = await fetch('/admin/choose_us/save', {
-                method: 'POST',
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
                 body: form,
             });
 
             if (response.ok) {
-                navigate('/choose_us');
+                navigate('/admin/choose_us');
             } else {
                 alert('Failed to save data.');
             }
@@ -48,7 +85,7 @@ export default function AddWhyChooseUs() {
             <div className="p-5 space-y-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                     <h1 className="text-2xl font-semibold">
-                        <Link to="/admin/choose_us">Why Choose Us</Link> / Add New
+                        <Link to="/admin/choose_us">Why Choose Us</Link> / {isEditMode ? 'Edit' : 'Add New'}
                     </h1>
                 </div>
 
@@ -74,8 +111,8 @@ export default function AddWhyChooseUs() {
                                 Subtitle <span className="text-red-500">*</span>
                             </label>
                             <textarea
-                                name="subtitle"
-                                value={formData.subtitle}
+                                name="subTitle"
+                                value={formData.subTitle}
                                 onChange={handleChange}
                                 rows="1"
                                 required
@@ -86,16 +123,22 @@ export default function AddWhyChooseUs() {
 
                         <div>
                             <label className="block font-medium mb-1">
-                                Image <span className="text-red-500">*</span>
+                                Image {isEditMode ? '' : <span className="text-red-500">*</span>}
                             </label>
                             <input
                                 type="file"
-                                name="image"
+                                name="whyChooseUsContentImage"
                                 accept="image/*"
                                 onChange={handleChange}
-                                required
                                 className="w-full border border-gray-300 rounded-md px-3 py-2"
                             />
+                            {existingImage && (
+                                <img
+                                    src={existingImage}
+                                    alt="Existing"
+                                    className="mt-2 rounded-md w-40 h-auto border"
+                                />
+                            )}
                         </div>
                     </div>
 
@@ -110,7 +153,7 @@ export default function AddWhyChooseUs() {
                             type="submit"
                             className="bg-black text-white px-5 py-2 rounded-md hover:bg-neutral-700 transition"
                         >
-                            Save
+                            {isEditMode ? 'Update' : 'Save'}
                         </button>
                     </div>
                 </form>

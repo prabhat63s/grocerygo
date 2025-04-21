@@ -1,35 +1,53 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import CommonLayout from '../../components/layout/CommonLayout';
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
 
 export default function Tutorial() {
+  const [tutorials, setTutorials] = useState([]);
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+  const { token } = useAuth();
 
-  const tutorials = [
-    {
-      id: 1,
-      title: 'Always fresh and healthy vegitables',
-      description: 'Lorem is dummy ipsum. Lorem is dummy ipsum. Lorem is dummy ipsum. Lorem is dummy ipsum.',
-      image: 'https://grocerygo.infotechgravity.com/storage/app/public/admin-assets/images/about/tutorial-62ecf9fcca405.jpg',
-      createdAt: 'Jun 17, 2022 08:33 AM',
-      updatedAt: 'Aug 05, 2022 05:37 AM',
-    },
-    {
-      id: 2,
-      title: 'Fresh ever and premium fruits',
-      description: 'Lorem is dummy ipsum. Lorem is dummy ipsum. Lorem is dummy ipsum. Lorem is dummy ipsum. Lorem is dummy ipsum.',
-      image: 'https://grocerygo.infotechgravity.com/storage/app/public/admin-assets/images/about/tutorial-62ecfa20c59cb.jpg',
-      createdAt: 'May 25, 2022 05:05 AM',
-      updatedAt: 'Aug 05, 2022 05:38 AM',
-    },
-    // Add more items as needed
-  ];
+  // --- Fetch from /api/contactus ---
+  const fetchTotorial = async () => {
+    if (!token) return;
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/tutorial`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // Handle either an array or { data: [...] }
+      const data = Array.isArray(res.data) ? res.data : res.data.data;
+      setTutorials(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to fetch tutorial:', error);
+    }
+  };
 
-  const filteredTutorials = tutorials.filter((item) =>
-    item.title.toLowerCase().includes(search.toLowerCase())
+  useEffect(() => {
+    fetchTotorial();
+  }, [token]);
+
+  // --- Delete handler ---
+  const handleDelete = async (id) => {
+    if (!token) return;
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_BASE_URL}/tutorial/${id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchTotorial();
+    } catch (error) {
+      console.error('Delete failed:', error);
+    }
+  };
+
+  const filteredTutorials = tutorials.filter((b) =>
+    b.title.toLowerCase().includes(search.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredTutorials.length / itemsPerPage);
@@ -37,12 +55,13 @@ export default function Tutorial() {
   const endIndex = startIndex + itemsPerPage;
   const currentItems = filteredTutorials.slice(startIndex, endIndex);
 
+
   const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage(prev => prev - 1);
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
+    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
   };
 
   return (
@@ -50,9 +69,9 @@ export default function Tutorial() {
       <div className="p-5 space-y-6">
         <div className="flex justify-between items-center flex-wrap gap-3">
           <ol className="flex gap-1 items-center">
-            <li><Link to="/tutorial" className="text-2xl font-semibold">Tutorial</Link></li>
+            <li><Link to="/admin/tutorial" className="text-2xl font-semibold">Tutorial</Link></li>
           </ol>
-          <Link to="/tutorial/add" className="bg-black text-white px-5 py-2 rounded hover:bg-neutral-700 text-sm">
+          <Link to="/admin/tutorial/add" className="bg-black text-white px-5 py-2 rounded hover:bg-neutral-700 text-sm">
             + Add New
           </Link>
         </div>
@@ -76,7 +95,7 @@ export default function Tutorial() {
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
-                  setCurrentPage(1); // Reset page on new search
+                  setCurrentPage(1);
                 }}
               />
             </div>
@@ -101,18 +120,18 @@ export default function Tutorial() {
                     <tr key={item.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                       <td className="border px-3 py-2">{startIndex + idx + 1}</td>
                       <td className="border px-3 py-2">
-                        <img src={item.image} alt={item.title} className="h-12 w-auto rounded" />
+                        <img src={item.tutorialImage} alt={item.title} className="h-12 w-auto rounded" />
                       </td>
                       <td className="border px-3 py-2">{item.title}</td>
-                      <td className="border px-3 py-2">{item.description}</td>
-                      <td className="border px-3 py-2">{item.createdAt}</td>
-                      <td className="border px-3 py-2">{item.updatedAt}</td>
+                      <td className="border px-3 py-2">{item.message}</td>
+                      <td className="border px-3 py-2">{new Date(item.createdAt || item.created).toLocaleString()}</td>
+                      <td className="border px-3 py-2">{new Date(item.updatedAt || item.updated).toLocaleString()}</td>
                       <td className="border px-3 py-2">
                         <div className="flex gap-2 text-white">
-                          <Link to={`/tutorial/${item.id}`} className="bg-blue-600 p-1.5 rounded-md hover:bg-blue-800">
+                          <Link to={`/admin/tutorial/${item._id}`} className="bg-blue-600 p-1.5 rounded-md hover:bg-blue-800">
                             <FaEdit />
                           </Link>
-                          <button onClick={() => alert('Delete clicked')} className="bg-red-500 p-1.5 rounded-md hover:bg-red-700">
+                          <button onClick={() => handleDelete(item._id)} className="bg-red-500 p-1.5 rounded-md hover:bg-red-700">
                             <FaTrash />
                           </button>
                         </div>

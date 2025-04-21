@@ -1,45 +1,79 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import CommonLayout from '../../components/layout/CommonLayout';
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
 
 export default function AddTutorial() {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [image, setImage] = useState(null);
+  const { id } = useParams();
   const navigate = useNavigate();
+  const { token } = useAuth();
 
-  const handleImageChange = (e) => {
-    if (e.target.files[0]) {
-      setImage(e.target.files[0]);
+  const [form, setForm] = useState({
+    title: '',
+    message: '',
+    tutorialImage: null,
+  });
+  const [existingImage, setExistingImage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Fetch tutorial data when editing
+  useEffect(() => {
+    if (!id) return;
+    const fetchTutorial = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/tutorial/${id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const { title, message, tutorialImage } = res.data;
+        setForm({ title, message, tutorialImage: null });
+        setExistingImage(tutorialImage);
+      } catch (err) {
+        console.error('Failed to load tutorial:', err);
+      }
+    };
+    fetchTutorial();
+  }, [id, token]);
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === 'tutorialImage') {
+      setForm(prev => ({ ...prev, tutorialImage: files[0] }));
+    } else {
+      setForm(prev => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title || !description || !image) {
-      alert("Please fill all required fields.");
-      return;
+    setLoading(true);
+    const formData = new FormData();
+    formData.append('title', form.title);
+    formData.append('message', form.message);
+    if (form.tutorialImage) {
+      formData.append('tutorialImage', form.tutorialImage);
     }
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("image", image);
-
     try {
-      const res = await fetch("/admin/tutorial/store", {
-        method: "POST",
-        body: formData,
+      const url = id
+        ? `${import.meta.env.VITE_BASE_URL}/tutorial/${id}`
+        : `${import.meta.env.VITE_BASE_URL}/tutorial`;
+      const method = id ? 'put' : 'post';
+
+      await axios[method](url, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
-      if (res.ok) {
-        navigate("/admin/tutorial");
-      } else {
-        alert("Failed to save tutorial.");
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Something went wrong.");
+      navigate('/admin/tutorial');
+    } catch (err) {
+      console.error('Save failed:', err);
+      alert('Failed to save tutorial.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,7 +83,7 @@ export default function AddTutorial() {
         <div className="flex justify-between items-center flex-wrap gap-3">
           <ol className="text-2xl font-semibold flex gap-1 items-center">
             <li><Link to="/tutorial">Tutorial</Link></li>
-            <li>/ Add New</li>
+            <li>/ {id ? 'Edit' : 'Add New'}</li>
           </ol>
         </div>
 
@@ -66,8 +100,8 @@ export default function AddTutorial() {
               <input
                 type="text"
                 name="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                value={form.title}
+                onChange={handleChange}
                 placeholder="Enter tutorial title"
                 required
                 className="w-full border px-4 py-2 rounded"
@@ -75,19 +109,23 @@ export default function AddTutorial() {
 
               <div className="mt-4">
                 <label className="block mb-1 font-medium">
-                  Image <span className="text-red-500">*</span>
+                  Image {id ? '' : <span className="text-red-500">*</span>}
                 </label>
                 <input
                   type="file"
-                  name="image"
+                  name="tutorialImage"
                   accept="image/*"
-                  required
-                  onChange={handleImageChange}
+                  onChange={handleChange}
                   className="w-full border px-4 py-2 rounded"
+                  required={!id}
                 />
-                {image && (
+                {(form.tutorialImage || existingImage) && (
                   <img
-                    src={URL.createObjectURL(image)}
+                    src={
+                      form.tutorialImage
+                        ? URL.createObjectURL(form.tutorialImage)
+                        : existingImage
+                    }
                     alt="Preview"
                     className="mt-2 h-24 rounded border"
                   />
@@ -100,9 +138,9 @@ export default function AddTutorial() {
                 Description <span className="text-red-500">*</span>
               </label>
               <textarea
-                name="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                name="message"
+                value={form.message}
+                onChange={handleChange}
                 placeholder="Enter tutorial description"
                 rows="6"
                 required
@@ -120,9 +158,10 @@ export default function AddTutorial() {
             </Link>
             <button
               type="submit"
+              disabled={loading}
               className="bg-black text-white px-5 py-2 rounded hover:bg-neutral-700"
             >
-              Save
+              {loading ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>

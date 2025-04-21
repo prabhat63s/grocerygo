@@ -1,40 +1,80 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import CommonLayout from '../../components/layout/CommonLayout';
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
 
 export default function AddBlog() {
-  const [title, setTitle] = useState('');
-  const [image, setImage] = useState(null);
-  const [description, setDescription] = useState('');
+  const { id } = useParams();
   const navigate = useNavigate();
+  const { token } = useAuth();
+
+  const [form, setForm] = useState({
+    title: '',
+    message: '',
+    blogImage: null,
+  });
+  const [existingImage, setExistingImage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Fetch blog data when editing
+  useEffect(() => {
+    if (!id) return;
+    const fetchBlog = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/blogs/${id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const { title, message, blogImage } = res.data;
+        setForm({ title, message, blogImage: null });
+        setExistingImage(blogImage);
+      } catch (err) {
+        console.error('Failed to load blog:', err);
+      }
+    };
+    fetchBlog();
+  }, [id, token]);
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === 'blogImage') {
+      setForm(prev => ({ ...prev, blogImage: files[0] }));
+    } else {
+      setForm(prev => ({ ...prev, [name]: value }));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!title || !image || !description) {
-      alert("Please fill in all fields.");
-      return;
-    }
-
+    setLoading(true);
+    const { title, message, blogImage } = form;
     const formData = new FormData();
     formData.append('title', title);
-    formData.append('image', image);
-    formData.append('description', description);
+    formData.append('message', message);
+    if (blogImage) {
+      formData.append('blogImage', blogImage);
+    }
 
     try {
-      const res = await fetch('/admin/blogs/store', {
-        method: 'POST',
-        body: formData,
+      const url = id
+        ? `${import.meta.env.VITE_BASE_URL}/blogs/${id}`
+        : `${import.meta.env.VITE_BASE_URL}/blogs`;
+      const method = id ? 'put' : 'post';
+
+      await axios[method](url, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
-      if (res.ok) {
-        navigate('/blogs');
-      } else {
-        alert('Failed to save blog.');
-      }
-    } catch (error) {
-      console.error(error);
-      alert('Something went wrong.');
+      navigate('/admin/blogs');
+    } catch (err) {
+      console.error('Save failed:', err);
+      alert('Failed to save blog.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,7 +83,7 @@ export default function AddBlog() {
       <div className="p-5 space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">
-            <Link to="/admin/blogs">Blogs</Link> / Add New
+            <Link to="/admin/blogs">Blogs</Link> / {id ? 'Edit' : 'Add New'}
           </h1>
         </div>
 
@@ -55,11 +95,14 @@ export default function AddBlog() {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="block font-medium mb-1">Title <span className="text-red-500">*</span></label>
+                <label className="block font-medium mb-1">
+                  Title <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  name="title"
+                  value={form.title}
+                  onChange={handleChange}
                   placeholder="Title"
                   className="w-full border px-4 py-2 rounded outline-none"
                   required
@@ -67,28 +110,37 @@ export default function AddBlog() {
               </div>
 
               <div>
-                <label className="block font-medium mb-1">Image <span className="text-red-500">*</span></label>
+                <label className="block font-medium mb-1">
+                  Image {id && existingImage && '(leave blank to keep)'} <span className="text-red-500">*</span>
+                </label>
+                {existingImage && !form.blogImage && (
+                  <img src={existingImage} alt="Current" className="mb-2 max-h-40" />
+                )}
                 <input
                   type="file"
+                  name="blogImage"
                   accept="image/*"
-                  onChange={(e) => setImage(e.target.files[0])}
+                  onChange={handleChange}
                   className="w-full border px-4 py-2 rounded"
-                  required
+                  required={!id}
                 />
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block font-medium mb-1">Description <span className="text-red-500">*</span></label>
+                <label className="block font-medium mb-1">
+                  Description <span className="text-red-500">*</span>
+                </label>
                 <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  name="message"
+                  value={form.message}
+                  onChange={handleChange}
                   rows={6}
                   placeholder="Description"
                   className="w-full border px-4 py-2 rounded outline-none"
                   required
-                ></textarea>
+                />
               </div>
             </div>
           </div>
@@ -102,9 +154,10 @@ export default function AddBlog() {
             </Link>
             <button
               type="submit"
-              className="bg-black text-white px-5 py-2 rounded hover:bg-neutral-700"
+              disabled={loading}
+              className="bg-black text-white px-5 py-2 rounded hover:bg-neutral-700 disabled:opacity-50"
             >
-              Save
+              {loading ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>

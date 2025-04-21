@@ -1,22 +1,21 @@
-import WhyChooseUs from "../models/whyChooseUsModel.js";
+import WhyChooseUsContent from "../models/whyChooseUsContentModel.js";
 
 // Create
 export const createWhyChooseUs = async (req, res) => {
   try {
-    const { title, subTitle, description } = req.body;
+    const { title, subTitle } = req.body;
     const domainName = req.protocol + "://" + req.get("host");
 
-    const whyChooseUsImage = req.file ? `${domainName}/uploads/whychooseus/${req.file.filename}` : "";
+    const whyChooseUsContentImage = req.file ? `${domainName}/uploads/whychooseus/${req.file.filename}` : "";
 
-    if (!whyChooseUsImage) {
+    if (!whyChooseUsContentImage) {
       return res.status(400).json({ message: "Image upload failed or missing." });
     }
 
-    const newItem = new WhyChooseUs({
+    const newItem = new WhyChooseUsContent({
       title,
       subTitle,
-      description,
-      whyChooseUsImage,
+      whyChooseUsContentImage,
     });
 
     await newItem.save();
@@ -30,7 +29,7 @@ export const createWhyChooseUs = async (req, res) => {
 // Get All
 export const getAllWhyChooseUs = async (req, res) => {
   try {
-    const items = await WhyChooseUs.find().sort({ createdAt: -1 });
+    const items = await WhyChooseUsContent.find().sort({ createdAt: -1 });
     res.status(200).json(items);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
@@ -40,7 +39,7 @@ export const getAllWhyChooseUs = async (req, res) => {
 // Get One
 export const getWhyChooseUsById = async (req, res) => {
   try {
-    const item = await WhyChooseUs.findById(req.params.id);
+    const item = await WhyChooseUsContent.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Item not found" });
     res.status(200).json(item);
   } catch (err) {
@@ -51,18 +50,17 @@ export const getWhyChooseUsById = async (req, res) => {
 // Update
 export const updateWhyChooseUs = async (req, res) => {
   try {
-    const { title, subTitle, description } = req.body;
+    const { title, subTitle } = req.body;
     const domainName = req.protocol + "://" + req.get("host");
 
-    const whyChooseUsImage = req.file ? `${domainName}/uploads/chooseUsUI/${req.file.filename}` : null;
+    const whyChooseUsContentImage = req.file ? `${domainName}/uploads/whychooseus/${req.file.filename}` : null;
 
-    const item = await WhyChooseUs.findById(req.params.id);
+    const item = await WhyChooseUsContent.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Item not found" });
 
     item.title = title || item.title;
     item.subTitle = subTitle || item.subTitle;
-    item.description = description || item.description;
-    if (whyChooseUsImage) item.whyChooseUsImage = whyChooseUsImage;
+    if (whyChooseUsContentImage) item.whyChooseUsContentImage = whyChooseUsContentImage;
 
     await item.save();
     res.status(200).json({ message: "WhyChooseUs updated", item });
@@ -75,7 +73,7 @@ export const updateWhyChooseUs = async (req, res) => {
 // Delete
 export const deleteWhyChooseUs = async (req, res) => {
   try {
-    const deleted = await WhyChooseUs.findByIdAndDelete(req.params.id);
+    const deleted = await WhyChooseUsContent.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ message: "Item not found" });
 
     res.status(200).json({ message: "Item deleted successfully" });

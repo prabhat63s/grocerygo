@@ -1,10 +1,14 @@
-
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import CommonLayout from '../../components/layout/CommonLayout';
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
 
 export default function AddCoupons() {
+    const { id } = useParams();
     const navigate = useNavigate();
+    const { token } = useAuth();
+
     const [form, setForm] = useState({
         title: '',
         discountType: '',
@@ -20,12 +24,46 @@ export default function AddCoupons() {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setForm(prev => ({ ...prev, [name]: value }));
+        setForm((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = () => {
-        alert('Coupon saved!');
-        navigate('/promocode')
+    // Fetch coupon data when editing
+    useEffect(() => {
+        if (!id) return;
+        const fetchCoupon = async () => {
+            try {
+                const res = await axios.get(
+                    `${import.meta.env.VITE_BASE_URL}/coupons/${id}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                setForm(res.data);
+            } catch (err) {
+                console.error('Failed to load coupon:', err);
+            }
+        };
+        fetchCoupon();
+    }, [id, token]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const url = id
+                ? `${import.meta.env.VITE_BASE_URL}/coupons/${id}`
+                : `${import.meta.env.VITE_BASE_URL}/coupons`;
+            const method = id ? 'put' : 'post';
+
+            await axios[method](url, form, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            navigate('/admin/promocode');
+        } catch (err) {
+            console.error('Save failed:', err);
+            alert('Failed to save coupon.');
+        }
     };
 
     return (
@@ -33,7 +71,7 @@ export default function AddCoupons() {
             <div className="flex flex-col gap-5 p-5">
                 <div className="flex justify-between md:flex-row flex-col gap-3 md:items-center">
                     <h1 className="text-2xl font-semibold">
-                        <Link to="/admin/promocode">Coupons</Link> / Add New
+                        <Link to="/admin/promocode">Coupons</Link> / {id ? 'Edit' : 'Add New'}
                     </h1>
                 </div>
 
@@ -50,7 +88,7 @@ export default function AddCoupons() {
                                     onChange={handleChange}
                                     placeholder="Title"
                                     required
-                                    className="w-full border mt-2 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400"
+                                    className="w-full border mt-2 rounded px-3 py-2"
                                 />
                             </div>
 
@@ -62,7 +100,7 @@ export default function AddCoupons() {
                                         value={form.discountType}
                                         onChange={handleChange}
                                         required
-                                        className="w-full border mt-2 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400"
+                                        className="w-full border mt-2 rounded px-3 py-2"
                                     >
                                         <option value="">Select</option>
                                         <option value="1">Fixed</option>
@@ -78,7 +116,7 @@ export default function AddCoupons() {
                                         onChange={handleChange}
                                         placeholder="Discount"
                                         required
-                                        className="w-full border mt-2 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400"
+                                        className="w-full border mt-2 rounded px-3 py-2"
                                     />
                                 </div>
                             </div>
@@ -90,7 +128,7 @@ export default function AddCoupons() {
                                     value={form.usageType}
                                     onChange={handleChange}
                                     required
-                                    className="w-full border mt-2 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400"
+                                    className="w-full border mt-2 rounded px-3 py-2"
                                 >
                                     <option value="">Select</option>
                                     <option value="1">Limited</option>
@@ -107,7 +145,7 @@ export default function AddCoupons() {
                                         value={form.usageLimit}
                                         onChange={handleChange}
                                         placeholder="Coupon usage limit"
-                                        className="w-full border mt-2 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400"
+                                        className="w-full border mt-2 rounded px-3 py-2"
                                     />
                                 </div>
                             )}
@@ -125,7 +163,7 @@ export default function AddCoupons() {
                                         onChange={handleChange}
                                         placeholder="Coupon Code"
                                         required
-                                        className="w-full border mt-2 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400"
+                                        className="w-full border mt-2 rounded px-3 py-2"
                                     />
                                 </div>
                                 <div>
@@ -137,7 +175,7 @@ export default function AddCoupons() {
                                         onChange={handleChange}
                                         placeholder="Min. Order Amount"
                                         required
-                                        className="w-full border mt-2 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400"
+                                        className="w-full border mt-2 rounded px-3 py-2"
                                     />
                                 </div>
                             </div>
@@ -151,7 +189,7 @@ export default function AddCoupons() {
                                         value={form.startDate}
                                         onChange={handleChange}
                                         required
-                                        className="w-full border mt-2 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400"
+                                        className="w-full border mt-2 rounded px-3 py-2"
                                     />
                                 </div>
                                 <div>
@@ -163,7 +201,7 @@ export default function AddCoupons() {
                                         onChange={handleChange}
                                         min={new Date().toISOString().split('T')[0]}
                                         required
-                                        className="w-full border mt-2 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400"
+                                        className="w-full border mt-2 rounded px-3 py-2"
                                     />
                                 </div>
                             </div>
@@ -177,7 +215,7 @@ export default function AddCoupons() {
                                     rows="4"
                                     required
                                     placeholder="Description"
-                                    className="w-full border mt-2 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400"
+                                    className="w-full border mt-2 rounded px-3 py-2"
                                 />
                             </div>
                         </div>
@@ -187,14 +225,13 @@ export default function AddCoupons() {
                     <div className="mt-6 text-end space-x-4">
                         <button
                             type="button"
-                            onClick={() => navigate('/promocode')}
+                            onClick={() => navigate('/admin/promocode')}
                             className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
                         >
                             Cancel
                         </button>
                         <button
-                            type="button"
-                            onClick={handleSubmit}
+                            type="submit"
                             className="px-4 py-2 bg-black hover:bg-neutral-700 text-white rounded"
                         >
                             Save
@@ -205,6 +242,3 @@ export default function AddCoupons() {
         </CommonLayout>
     );
 }
-
-
-

@@ -1,38 +1,56 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CommonLayout from '../../components/layout/CommonLayout';
 import { FaCheck, FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
 import { Link, useParams } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Banner() {
-  const { id } = useParams();
-  const initialBanners = [
-    {
-      id: '1',
-      image: 'https://grocerygo.infotechgravity.com/storage/app/public/admin-assets/images/slider/slider-66712f63544a0.png',
-      category: 'Dairy Products',
-      product: '--',
-      status: 'active',
-      createdAt: 'Jun 18, 2024 07:20 AM',
-      updatedAt: 'Jan 28, 2025 12:16 AM'
-    },
-    {
-      id: '2',
-      image: 'https://grocerygo.infotechgravity.com/storage/app/public/admin-assets/images/slider/slider-667130d0e8062.png',
-      category: 'Bread & Bakery',
-      product: '--',
-      status: 'active',
-      createdAt: 'Jun 18, 2024 07:03 AM',
-      updatedAt: 'Jan 28, 2025 12:16 AM'
-    }
-  ];
+  const { id } = useParams();  // Extract type from the URL (e.g., bannersection-1)
+  const { token } = useAuth();
 
-  const [banners, setBanners] = useState(initialBanners);
+  const [banners, setBanners] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  // Fetch banners dynamically based on the `id` in the URL
+  const fetchBanner = async () => {
+    if (!token || !id) return;
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/banner?type=${id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log('API Response:', res.data); // Log the response
+      const data = Array.isArray(res.data) ? res.data : res.data.data;
+      setBanners(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to fetch banner:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchBanner();
+  }, [token, id]);  // Re-fetch when token or id changes
+
+  // --- Delete handler ---
+  const handleDelete = async (bannerId) => {
+    if (!token) return;
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_BASE_URL}/banner/${bannerId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchBanner();  // Re-fetch after delete
+    } catch (error) {
+      console.error('Delete failed:', error);
+    }
+  };
+
   const filteredBanners = banners.filter(banner =>
-    banner.product.toLowerCase().includes(searchText.toLowerCase())
+    banner.product?._id?.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredBanners.length / itemsPerPage);
@@ -52,8 +70,12 @@ export default function Banner() {
     <CommonLayout>
       <div className="flex flex-col gap-5 p-5">
         <div className="flex justify-between md:flex-row flex-col gap-3 md:items-center">
-          <h1 className="text-2xl font-semibold"> {id.replace(/-/g, ' ').replace(/bannersection/i, 'Banner Section')}</h1>
-          <Link to={`/admin/banner/${id}/add`} className="px-5 flex gap-2 items-center justify-center py-1.5 bg-black hover:bg-neutral-700 text-white rounded">
+          <h1 className="text-2xl font-semibold">
+            {id
+              .replace(/-/g, ' ')
+              .replace(/\b\w/g, (char) => char.toUpperCase())}
+          </h1>
+          <Link to={`/admin/${id}/add`} className="px-5 flex gap-2 items-center justify-center py-1.5 bg-black hover:bg-neutral-700 text-white rounded">
             <FaPlus /> Add New
           </Link>
         </div>
@@ -80,49 +102,64 @@ export default function Banner() {
           </div>
 
           <div className="overflow-x-auto mt-4">
-              <table className="min-w-full text-sm border border-gray-200 rounded-md">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="border px-4 py-2 text-left">#</th>
-                    <th className="border px-4 py-2 text-left">Image</th>
-                    <th className="border px-4 py-2 text-left">Category</th>
-                    <th className="border px-4 py-2 text-left">Product</th>
-                    <th className="border px-4 py-2 text-left">Status</th>
-                    <th className="border px-4 py-2 text-left">Created Date</th>
-                    <th className="border px-4 py-2 text-left">Updated Date</th>
-                    <th className="border px-4 py-2 text-left">Action</th>
+            <table className="min-w-full text-sm border border-gray-200 rounded-md">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="border px-4 py-2 text-left">#</th>
+                  <th className="border px-4 py-2 text-left">Image</th>
+                  <th className="border px-4 py-2 text-left">Category</th>
+                  <th className="border px-4 py-2 text-left">Product</th>
+                  <th className="border px-4 py-2 text-left">Status</th>
+                  <th className="border px-4 py-2 text-left">Created Date</th>
+                  <th className="border px-4 py-2 text-left">Updated Date</th>
+                  <th className="border px-4 py-2 text-left">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentBanners.map((banner, index) => (
+                  <tr
+                    key={banner._id}
+                    className={index % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
+                  >
+                    <td className="border px-4 py-2">{startIndex + index + 1}</td>
+                    <td className="border px-4 py-2">
+                      <img src={banner.bannerImage} alt="Banner" className="h-12 rounded" />
+                    </td>
+                    <td className="border px-4 py-2">{banner.category?.name || '—'}</td>
+                    <td className="border px-4 py-2">{banner.product?.name || '—'}</td>
+                    <td className="border px-4 py-2">
+                      {banner.status ? (
+                        <span className="bg-green-500 text-white text-xs inline-flex items-center justify-center p-1.5 rounded">
+                          <FaCheck className="text-sm" />
+                        </span>
+                      ) : (
+                        <span className="bg-red-500 text-white text-xs inline-flex items-center justify-center p-1.5 rounded">Inactive</span>
+                      )}
+                    </td>
+                    <td className="border px-4 py-2">{new Date(banner.createdAt).toLocaleString()}</td>
+                    <td className="border px-4 py-2">{new Date(banner.updatedAt).toLocaleString()}</td>
+                    <td className="border px-4 py-2 text-white">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          to={`/admin/${id}/${banner._id}`}
+                          className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md"
+                          title="Edit"
+                        >
+                          <FaEdit />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(banner._id)}
+                          className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md"
+                          title="Delete"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                    <tbody>
-                      {currentBanners.map((banner, index) => (
-                            <tr
-                              className={index % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
-                            >
-                              <td className="border px-4 py-2">{startIndex + index + 1}</td>
-                              <td className="border px-4 py-2"><img src={banner.image} alt="Banner" className="h-12 rounded" /></td>
-                              <td className="border px-4 py-2">{banner.category}</td>
-                              <td className="border px-4 py-2">{banner.product}</td>
-                              <td className="border px-4 py-2">
-                                <span className="bg-green-500 text-white text-xs inline-flex items-center justify-center p-1.5 rounded">
-                                  <FaCheck className="text-sm" />
-                                </span>
-                              </td>
-                              <td className="border px-4 py-2">{banner.createdAt}</td>
-                              <td className="border px-4 py-2">{banner.updatedAt}</td>
-                              <td className="border px-4 py-2 text-white">
-                                <div className="flex items-center gap-2">
-                                  <Link to={`/admin/banner-${banner.id}`} className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
-                                    <FaEdit />
-                                  </Link>
-                                  <button className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
-                                    <FaTrash />
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                      ))}
-                    </tbody>
-              </table>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           <div className="flex justify-between items-center mt-4 text-sm text-gray-600">

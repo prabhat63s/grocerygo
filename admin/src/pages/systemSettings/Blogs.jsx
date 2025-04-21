@@ -1,33 +1,50 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaEdit, FaTrash, } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import CommonLayout from '../../components/layout/CommonLayout';
-
-const initialBlogs = [
-  {
-    id: '3',
-    title: 'Addictive Appetizers: Sausage Cheese Balls',
-    description: 'Lorem is dummy ipsum text. Lorem is dummy ipsum text...',
-    image: 'https://grocerygo.infotechgravity.com/storage/app/public/admin-assets/images/about/blog-800_400.svg',
-    created: 'May 25, 2022 01:48 AM',
-    updated: 'Jan 28, 2025 04:16 AM',
-  },
-  {
-    id: '11',
-    title: 'Traditional Soft Pretzels with Sweet Beer Cheese',
-    description: 'Lorem is dummy ipsum text. Lorem is dummy ipsum text...',
-    image: 'https://grocerygo.infotechgravity.com/storage/app/public/admin-assets/images/about/blog-800_400.svg',
-    created: 'Jul 01, 2022 05:41 PM',
-    updated: 'Jan 28, 2025 04:16 AM',
-  },
-  // Add more blogs as needed...
-];
+import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Blogs() {
-  const [blogs, setBlogs] = useState(initialBlogs);
+  const [blogs, setBlogs] = useState([]);
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+  const { token } = useAuth();
+
+  // --- Fetch from /api/contactus ---
+  const fetchBlogs = async () => {
+    if (!token) return;
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/blogs`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // Handle either an array or { data: [...] }
+      const data = Array.isArray(res.data) ? res.data : res.data.data;
+      setBlogs(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to fetch Blogs:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBlogs();
+  }, [token]);
+
+  // --- Delete handler ---
+  const handleDelete = async (id) => {
+    if (!token) return;
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_BASE_URL}/blogs/${id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchBlogs();
+    } catch (error) {
+      console.error('Delete failed:', error);
+    }
+  };
 
   const filteredBlogs = blogs.filter((b) =>
     b.title.toLowerCase().includes(search.toLowerCase())
@@ -38,11 +55,6 @@ export default function Blogs() {
   const endIndex = startIndex + itemsPerPage;
   const currentItems = filteredBlogs.slice(startIndex, endIndex);
 
-  const handleDelete = (id) => {
-    if (confirm('Are you sure you want to delete this blog?')) {
-      setBlogs((prev) => prev.filter((b) => b.id !== id));
-    }
-  };
 
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
@@ -57,7 +69,7 @@ export default function Blogs() {
       <div className="p-5 space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Blogs</h1>
-          <Link to="/blogs/add" className="btn btn-primary px-4 py-2 bg-black text-white rounded hover:bg-neutral-700">
+          <Link to="/admin/blogs/add" className="btn btn-primary px-4 py-2 bg-black text-white rounded hover:bg-neutral-700">
             + Add New
           </Link>
         </div>
@@ -78,7 +90,7 @@ export default function Blogs() {
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
-                  setCurrentPage(1); // Reset to page 1
+                  setCurrentPage(1);
                 }}
               />
             </div>
@@ -98,24 +110,24 @@ export default function Blogs() {
             </thead>
             <tbody>
               {currentItems.map((blog, index) => (
-                <tr
+                <tr key={index}
                   className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
                 >
                   <td className="border px-3 py-2">{startIndex + index + 1}</td>
                   <td className="border px-3 py-2">
-                    <img src={blog.image} alt="Blog" className="h-12 w-auto rounded" />
+                    <img src={blog.blogImage} alt="Blog" className="h-12 w-auto rounded" />
                   </td>
                   <td className="border px-3 py-2">{blog.title}</td>
-                  <td className="border px-3 py-2 truncate max-w-sm">{blog.description}</td>
-                  <td className="border px-3 py-2">{blog.created}</td>
-                  <td className="border px-3 py-2">{blog.updated}</td>
+                  <td className="border px-3 py-2 truncate max-w-sm">{blog.message}</td>
+                  <td className="border px-3 py-2">{new Date(blog.createdAt || blog.created).toLocaleString()}</td>
+                  <td className="border px-3 py-2">{new Date(blog.updatedAt || blog.updated).toLocaleString()}</td>
                   <td className="border px-3 py-2">
                     <div className="flex gap-2">
-                      <Link to={`/blogs/${blog.id}`} className="p-1.5 bg-blue-500 text-white rounded hover:bg-blue-600">
+                      <Link to={`/admin/blogs/${blog._id}`} className="p-1.5 bg-blue-500 text-white rounded hover:bg-blue-600">
                         <FaEdit />
                       </Link>
                       <button
-                        onClick={() => handleDelete(blog.id)}
+                        onClick={() => handleDelete(blog._id)}
                         className="p-1.5 bg-red-500 text-white rounded hover:bg-red-600"
                       >
                         <FaTrash />

@@ -1,44 +1,47 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CommonLayout from '../../components/layout/CommonLayout';
 import { FaCheck, FaEdit, FaExclamationCircle, FaPlus, FaTrash } from 'react-icons/fa';
+import axios from 'axios';
 
 import { Link } from 'react-router-dom';
 
 export default function Slider() {
-    const initialSliders = [
-        {
-            id: '1',
-            image: 'https://grocerygo.infotechgravity.com/storage/app/public/admin-assets/images/slider/slider-66712f63544a0.png',
-            title: '',
-            category: '--',
-            product: '--',
-            description: '',
-            status: 'active',
-            createdDate: 'Jan 28, 2025 05:46 AM',
-            updatedDate: 'Jan 28, 2025 12:16 AM'
-        },
-        {
-            id: '2',
-            image: 'https://grocerygo.infotechgravity.com/storage/app/public/admin-assets/images/slider/slider-667130d0e8062.png',
-            title: '',
-            category: '--',
-            product: '--',
-            description: '',
-            status: 'active',
-            createdDate: 'Jan 28, 2025 05:46 AM',
-            updatedDate: 'Jan 28, 2025 12:16 AM'
-        }
-    ];
-
-
-    const [sliders, setSliders] = useState(initialSliders);
+    const [sliders, setSliders] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
 
+    useEffect(() => {
+        const fetchSliders = async () => {
+            try {
+                const { data } = await axios.get(`${import.meta.env.VITE_BASE_URL}/sliders`);
+                setSliders(data);
+            } catch (error) {
+                console.error("Failed to fetch sliders", error);
+            }
+        };
+
+        fetchSliders();
+    }, []);
+
+    const handleDelete = async (id) => {
+        if (window.confirm("Are you sure you want to delete this slider?")) {
+            try {
+                await axios.delete(`${import.meta.env.VITE_BASE_URL}/sliders/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                });
+                setSliders(prev => prev.filter(slider => slider._id !== id));
+            } catch (err) {
+                console.error("Failed to delete slider", err);
+            }
+        }
+    };
+
     // Filter categories based on search
     const filteredSliders = sliders.filter(slider =>
-        slider.product.toLowerCase().includes(searchTerm.toLowerCase())
+        (slider.product || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const totalPages = Math.ceil(filteredSliders.length / rowsPerPage);
@@ -98,54 +101,47 @@ export default function Slider() {
                                     <th className="border px-4 py-2 text-left">Image</th>
                                     <th className="border px-4 py-2 text-left">Title</th>
                                     <th className="border px-4 py-2 text-left">Category</th>
-                                    <th className="border px-4 py-2 text-left">Product Description</th>
+                                    <th className="border px-4 py-2 text-left">Product</th>
+                                    <th className="border px-4 py-2 text-left">Description</th>
                                     <th className="border px-4 py-2 text-left">Status</th>
                                     <th className="border px-4 py-2 text-left">Created Date</th>
                                     <th className="border px-4 py-2 text-left">Updated Date</th>
                                     <th className="border px-4 py-2 text-left">Action</th>
                                 </tr>
                             </thead>
-
-                            <tbody
-
-                            >
+                            <tbody>
                                 {currentSliders.map((slider, idx) => (
-
                                     <tr
-
+                                        key={idx}
                                         className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
                                     >
-
                                         <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
                                         <td className="border px-4 py-2"><img src={slider.image} alt="Slider" className="h-12 rounded" /></td>
                                         <td className="border px-4 py-2">{slider.title || '--'}</td>
-                                        <td className="border px-4 py-2">{slider.category}</td>
+                                        <td className="border px-4 py-2">{slider.type === "category" ? slider.category : null}</td>
+                                        <td className="border px-4 py-2">{slider.product}</td>
                                         <td className="border px-4 py-2">{slider.description || '--'}</td>
                                         <td className="border px-4 py-2">
                                             <span className="bg-green-500 text-white text-xs inline-flex items-center justify-center p-1.5 rounded">
                                                 <FaCheck className="text-sm" />
                                             </span>
                                         </td>
-                                        <td className="border px-4 py-2">{slider.createdDate}</td>
-                                        <td className="border px-4 py-2">{slider.updatedDate}</td>
+                                        <td className="border px-3 py-2">{new Date(slider.createdAt).toLocaleString()}</td>
+                                        <td className="border px-3 py-2">{new Date(slider.updatedAt).toLocaleString()}</td>
                                         <td className="border px-4 py-2 text-white">
                                             <div className="flex items-center gap-2">
-                                                <Link to={`/admin/slider-${slider.id}`} className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
+                                                <Link to={`/admin/slider/${slider._id}`} className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
                                                     <FaEdit />
                                                 </Link>
-                                                <button className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
+                                                <button onClick={() => handleDelete(slider._id)} className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
                                                     <FaTrash />
                                                 </button>
                                             </div>
                                         </td>
                                     </tr>
-
                                 ))}
-
                             </tbody>
-
                         </table>
-
                     </div>
 
                     {/* Pagination Footer */}

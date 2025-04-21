@@ -10,11 +10,17 @@ import productRoutes from './routes/productRoutes.js';
 import taxRoutes from './routes/taxRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import chooseUsUiRoutes from './routes/chooseUsUiRoutes.js';
-// import whyChooseUsRoutes from './routes/whyChooseUsRoutes.js';
+import whyChooseUsRoutes from './routes/whyChooseUsRoutes.js';
 import pagesRoutes from './routes/pagesRoutes.js';
 import faqRoutes from './routes/faqRoutes.js';
 import galleryRoutes from './routes/galleryRoutes.js';
 import teamRoutes from './routes/teamRoutes.js';
+import newsletterRoutes from './routes/newsletterRoutes.js';
+import contactUsRoutes from './routes/contactUsRoutes.js';
+import blogRoutes from './routes/blogRoutes.js';
+import tutorialRoutes from './routes/tutorialRoutes.js';
+import bannerRoutes from './routes/bannerRoutes.js';
+import sliderRoutes from './routes/sliderRoutes.js';
 
 // Configure environment variables
 dotenv.config();
@@ -44,11 +50,17 @@ app.use("/api/products", productRoutes);
 app.use('/api/taxes', taxRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/chooseUsUi", chooseUsUiRoutes);
-// app.use("/api/why-choose-us", whyChooseUsRoutes);
+app.use("/api/why-choose-us", whyChooseUsRoutes);
 app.use("/api/content", pagesRoutes);
 app.use('/api/faq', faqRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/team', teamRoutes);
+app.use('/api/newsletter', newsletterRoutes);
+app.use("/api/contactus", contactUsRoutes);
+app.use("/api/blogs", blogRoutes);
+app.use("/api/tutorial", tutorialRoutes);
+app.use('/api/banner', bannerRoutes);
+app.use("/api/sliders", sliderRoutes);
 
 // Start the server
 app.listen(PORT, () => {

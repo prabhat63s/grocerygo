@@ -1,51 +1,69 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CommonLayout from "../../components/layout/CommonLayout";
 import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ChooseUsUI from "./ChooseUsUI";
+import axios from "axios";
+import { useAuth } from "../../context/AuthContext";
 
 export default function WhyChooseUs() {
     const [search, setSearch] = useState("");
+    const [whyChooseUsContent, setWhyChooseUsContent] = useState([]);
+    const navigate = useNavigate()
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 5;
+    const { token } = useAuth();
 
-    const notifications = [
-        {
-            id: 1,
-            image: "/img/choose-1.png",
-            title: "Responsive Website or Platform",
-            subtitle: "If you have your own website, ensure it's mobile-responsive and user-friendly",
-            created: "Jun 05, 2024 07:17 AM",
-            updated: "Jan 28, 2025 04:09 AM",
-        },
-        {
-            id: 2,
-            image: "/img/choose-2.png",
-            title: "Product Research and Selection",
-            subtitle: "Conduct thorough market research to identify trending and in-demand products",
-            created: "Jun 05, 2024 07:16 AM",
-            updated: "Jan 28, 2025 04:09 AM",
-        },
-        {
-            id: 3,
-            image: "/img/choose-3.png",
-            title: "Quality Product Listings",
-            subtitle: "Create clear, detailed, and accurate product listings with high-quality images",
-            created: "Jun 05, 2024 07:17 AM",
-            updated: "Jun 18, 2024 10:47 AM",
-        },
-        {
-            id: 4,
-            image: "/img/choose-4.png",
-            title: "Pricing and Discounts",
-            subtitle: "Price your products competitively based on market research and production costs.",
-            created: "Jun 05, 2024 07:17 AM",
-            updated: "Jun 18, 2024 10:47 AM",
-        },
-    ];
+    const fetchWhyChooseUsContent = async () => {
+        try {
+            const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/why-choose-us`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setWhyChooseUsContent(res.data);
+        } catch (error) {
+            console.error('Failed to fetch team:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchWhyChooseUsContent();
+    }, []);
 
 
-    const filtered = notifications.filter((n) =>
-        n.title.toLowerCase().includes(search.toLowerCase())
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this member?')) return;
+        try {
+            await axios.delete(`${import.meta.env.VITE_BASE_URL}/why-choose-us/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            fetchWhyChooseUsContent(); // Refresh the list
+        } catch (error) {
+            console.error('Delete failed:', error);
+        }
+    };
+
+    const filteredList = whyChooseUsContent.filter((item) =>
+        item.title.toLowerCase().includes(search.toLowerCase())
     );
+
+    const totalPages = Math.ceil(filteredList.length / rowsPerPage);
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const currentItems = filteredList.slice(startIndex, endIndex);
+
+    const handlePrev = () => {
+        if (currentPage > 1) setCurrentPage(prev => prev - 1);
+      };
+
+      const handleNext = () => {
+        if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
+      };
+
 
     return (
         <CommonLayout>
@@ -55,7 +73,7 @@ export default function WhyChooseUs() {
                 </div>
 
                 {/* Form */}
-               <ChooseUsUI />
+                <ChooseUsUI />
 
                 {/* Table Actions */}
                 <div className="p-4 bg-gray-50 rounded-md shadow">
@@ -104,26 +122,26 @@ export default function WhyChooseUs() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filtered.map((item, index) => (
-                                    <tr key={item.id} className="border hover:bg-gray-50">
-                                        <td className="border px-4 py-2">{index + 1}</td>
+                                {currentItems.map((item, index) => (
+                                    <tr key={item._id} className="border hover:bg-gray-50">
+                                        <td className="border px-4 py-2">{startIndex + index + 1}</td>
                                         <td className="border px-4 py-2">
                                             <img
-                                                src={item.image}
+                                                src={item.whyChooseUsContentImage}
                                                 alt="item"
                                                 className="w-10 h-10 object-cover rounded"
                                             />
                                         </td>
                                         <td className="border px-4 py-2">{item.title}</td>
-                                        <td className="border px-4 py-2">{item.subtitle}</td>
-                                        <td className="border px-4 py-2">{item.created}</td>
-                                        <td className="border px-4 py-2">{item.updated}</td>
+                                        <td className="border px-4 py-2">{item.subTitle}</td>
+                                        <td className="border px-3 py-2">{new Date(item.createdAt).toLocaleString()}</td>
+                                        <td className="border px-3 py-2">{new Date(item.updatedAt).toLocaleString()}</td>
                                         <td className="border px-4 py-2 text-white">
                                             <div className="flex items-center gap-2">
-                                                <button className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
+                                                <button onClick={() => navigate(`/admin/choose_us/${item._id}`)} className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
                                                     <FaEdit />
                                                 </button>
-                                                <button className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
+                                                <button onClick={() => handleDelete(item._id)} className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
                                                     <FaTrash />
                                                 </button>
                                             </div>
@@ -131,8 +149,32 @@ export default function WhyChooseUs() {
                                     </tr>
                                 ))}
                             </tbody>
+
                         </table>
                     </div>
+
+                    <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
+                        <div>
+                            Showing {filteredList.length === 0 ? "0 to 0" : `${startIndex + 1} to ${Math.min(endIndex, filteredList.length)}`} of {filteredList.length} entries
+                        </div>
+                        <div className="space-x-2">
+                            <button
+                                onClick={handlePrev}
+                                disabled={currentPage === 1}
+                                className="px-3 py-1 border rounded disabled:opacity-50"
+                            >
+                                Previous
+                            </button>
+                            <button
+                                onClick={handleNext}
+                                disabled={currentPage === totalPages || totalPages === 0}
+                                className="px-3 py-1 border rounded disabled:opacity-50"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </CommonLayout>
