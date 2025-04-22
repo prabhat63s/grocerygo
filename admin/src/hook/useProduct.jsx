@@ -7,7 +7,6 @@ const BASE_URL = `${import.meta.env.VITE_BASE_URL}/products`;
 export const useProduct = () => {
     const { token } = useAuth();
     const [products, setProducts] = useState([]);
-    const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -16,8 +15,7 @@ export const useProduct = () => {
         setError(null);
         try {
             const { data } = await axios.get(BASE_URL);
-            console.log("Fetched products:", data);
-            setProducts(data.products || []);
+            setProducts(data.products);
         } catch (err) {
             const message = err.response?.data?.message || "Error fetching products";
             setError(message);
@@ -33,7 +31,7 @@ export const useProduct = () => {
         console.log(`Fetching product with ID: ${id}`);
         try {
             const { data } = await axios.get(`${BASE_URL}/${id}`);
-            setProduct(data.product || null);
+            setProducts(data.product);
             console.log("Fetched product:", data.product);
         } catch (err) {
             const message = err.response?.data?.message || "Error fetching product";
@@ -111,7 +109,6 @@ export const useProduct = () => {
         }
     };
 
-
     const searchProducts = async (query) => {
         setLoading(true);
         setError(null);
@@ -133,7 +130,6 @@ export const useProduct = () => {
 
     return {
         products,
-        product,
         loading,
         error,
         fetchAllProducts,

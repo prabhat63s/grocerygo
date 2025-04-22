@@ -4,9 +4,10 @@ import { FaCheck, FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { FaX } from 'react-icons/fa6';
 
 export default function Banner() {
-  const { id } = useParams();  // Extract type from the URL (e.g., bannersection-1)
+  const { type } = useParams();
   const { token } = useAuth();
 
   const [banners, setBanners] = useState([]);
@@ -16,10 +17,10 @@ export default function Banner() {
 
   // Fetch banners dynamically based on the `id` in the URL
   const fetchBanner = async () => {
-    if (!token || !id) return;
+    if (!token || !type) return;
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/banner?type=${id}`,
+        `${import.meta.env.VITE_BASE_URL}/banner?type=${type}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log('API Response:', res.data); // Log the response
@@ -33,7 +34,7 @@ export default function Banner() {
 
   useEffect(() => {
     fetchBanner();
-  }, [token, id]);  // Re-fetch when token or id changes
+  }, [token, type]);  // Re-fetch when token or id changes
 
   // --- Delete handler ---
   const handleDelete = async (bannerId) => {
@@ -49,9 +50,27 @@ export default function Banner() {
     }
   };
 
-  const filteredBanners = banners.filter(banner =>
-    banner.product?._id?.toLowerCase().includes(searchText.toLowerCase())
-  );
+  // toggle status of a category
+  const handleToggleStatus = async (id) => {
+    try {
+      await axios.patch(`${import.meta.env.VITE_BASE_URL}/banner/${id}/toggle-status`);
+
+      fetchBanner();
+    } catch (err) {
+      console.error("Status toggle failed:", err);
+    }
+  };
+
+  const filteredBanners = searchText
+    ? banners.filter((banner) => {
+      const search = searchText.toLowerCase();
+      return (
+        banner.product?.name?.toLowerCase().includes(search) ||
+        banner.category?.name?.toLowerCase().includes(search)
+      );
+    })
+    : banners;
+
 
   const totalPages = Math.ceil(filteredBanners.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -71,13 +90,14 @@ export default function Banner() {
       <div className="flex flex-col gap-5 p-5">
         <div className="flex justify-between md:flex-row flex-col gap-3 md:items-center">
           <h1 className="text-2xl font-semibold">
-            {id
+            {type
               .replace(/-/g, ' ')
               .replace(/\b\w/g, (char) => char.toUpperCase())}
           </h1>
-          <Link to={`/admin/${id}/add`} className="px-5 flex gap-2 items-center justify-center py-1.5 bg-black hover:bg-neutral-700 text-white rounded">
+          <Link to={`/admin/${type}/add`} className="px-5 flex gap-2 items-center justify-center py-1.5 bg-black hover:bg-neutral-700 text-white rounded">
             <FaPlus /> Add New
           </Link>
+
         </div>
 
         <div className="p-4 bg-white rounded-md shadow">
@@ -128,20 +148,19 @@ export default function Banner() {
                     <td className="border px-4 py-2">{banner.category?.name || '—'}</td>
                     <td className="border px-4 py-2">{banner.product?.name || '—'}</td>
                     <td className="border px-4 py-2">
-                      {banner.status ? (
-                        <span className="bg-green-500 text-white text-xs inline-flex items-center justify-center p-1.5 rounded">
-                          <FaCheck className="text-sm" />
-                        </span>
-                      ) : (
-                        <span className="bg-red-500 text-white text-xs inline-flex items-center justify-center p-1.5 rounded">Inactive</span>
-                      )}
+                      <span
+                        onClick={() => handleToggleStatus(banner._id)}
+                        className={`text-white w-fit p-1.5 rounded-md flex items-center justify-center cursor-pointer ${banner.status ? "bg-green-500" : "bg-red-500"}`}
+                      >
+                        {banner.status ? <FaCheck /> : <FaX />}
+                      </span>
                     </td>
                     <td className="border px-4 py-2">{new Date(banner.createdAt).toLocaleString()}</td>
                     <td className="border px-4 py-2">{new Date(banner.updatedAt).toLocaleString()}</td>
                     <td className="border px-4 py-2 text-white">
                       <div className="flex items-center gap-2">
                         <Link
-                          to={`/admin/${id}/${banner._id}`}
+                          to={`/admin/${type}/${banner._id}`}
                           className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md"
                           title="Edit"
                         >

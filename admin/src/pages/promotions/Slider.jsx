@@ -4,6 +4,7 @@ import { FaCheck, FaEdit, FaExclamationCircle, FaPlus, FaTrash } from 'react-ico
 import axios from 'axios';
 
 import { Link } from 'react-router-dom';
+import { FaX } from 'react-icons/fa6';
 
 export default function Slider() {
     const [sliders, setSliders] = useState([]);
@@ -11,16 +12,16 @@ export default function Slider() {
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
 
-    useEffect(() => {
-        const fetchSliders = async () => {
-            try {
-                const { data } = await axios.get(`${import.meta.env.VITE_BASE_URL}/sliders`);
-                setSliders(data);
-            } catch (error) {
-                console.error("Failed to fetch sliders", error);
-            }
-        };
+    const fetchSliders = async () => {
+        try {
+            const { data } = await axios.get(`${import.meta.env.VITE_BASE_URL}/sliders`);
+            setSliders(data);
+        } catch (error) {
+            console.error("Failed to fetch sliders", error);
+        }
+    };
 
+    useEffect(() => {
         fetchSliders();
     }, []);
 
@@ -36,6 +37,17 @@ export default function Slider() {
             } catch (err) {
                 console.error("Failed to delete slider", err);
             }
+        }
+    };
+
+    // toggle status of a category
+    const handleToggleStatus = async (id) => {
+        try {
+            await axios.patch(`${import.meta.env.VITE_BASE_URL}/sliders/${id}/toggle-status`);
+
+            fetchSliders();
+        } catch (err) {
+            console.error("Status toggle failed:", err);
         }
     };
 
@@ -118,12 +130,15 @@ export default function Slider() {
                                         <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
                                         <td className="border px-4 py-2"><img src={slider.image} alt="Slider" className="h-12 rounded" /></td>
                                         <td className="border px-4 py-2">{slider.title || '--'}</td>
-                                        <td className="border px-4 py-2">{slider.type === "category" ? slider.category : null}</td>
-                                        <td className="border px-4 py-2">{slider.product}</td>
+                                        <td className="border px-4 py-2">{slider?.category?.name || "--"}</td>
+                                        <td className="border px-4 py-2">{slider?.product?.name || "--"}</td>
                                         <td className="border px-4 py-2">{slider.description || '--'}</td>
                                         <td className="border px-4 py-2">
-                                            <span className="bg-green-500 text-white text-xs inline-flex items-center justify-center p-1.5 rounded">
-                                                <FaCheck className="text-sm" />
+                                            <span
+                                                onClick={() => handleToggleStatus(slider._id)}
+                                                className={`text-white w-fit p-1.5 rounded-md flex items-center justify-center cursor-pointer ${slider.status ? "bg-green-500" : "bg-red-500"}`}
+                                            >
+                                                {slider.status ? <FaCheck /> : <FaX />}
                                             </span>
                                         </td>
                                         <td className="border px-3 py-2">{new Date(slider.createdAt).toLocaleString()}</td>

@@ -1,66 +1,97 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CommonLayout from '../../components/layout/CommonLayout'
 import Select from "react-select";
-import { FaEdit, FaTrash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { FaTrash } from "react-icons/fa";
+import axios from "axios";
+import { useProduct } from "../../hook/useProduct";
 
 
 export default function TopDeal() {
     const [dealType, setDealType] = useState("2");
-    const [topDeal, setTopDeal] = useState(true);
+    const [toggleTopDeal, setToggleTopDeal] = useState(true);
     const [offerType, setOfferType] = useState("2");
     const [selectedProducts, setSelectedProducts] = useState([]);
+    const [fetchedTopDeals, setFetchedTopDeals] = useState([]);
 
-    const products = [
-        { id: 1, name: "Sinduri Mango" },
-        { id: 2, name: "Pineapple (1 piece)" },
-        { id: 3, name: "Kiran Watermelon" },
-        { id: 4, name: "Banana (3 pieces)" },
-        { id: 5, name: "Green Grapes" },
-    ];
+    const { products, fetchAllProducts } = useProduct();
+
+    useEffect(() => {
+        fetchAllProducts();
+    }, []);
 
     const options = products.map((product) => ({
-        value: product.id,
+        value: product._id,
         label: product.name,
     }));
 
-    const handleSubmit = () => {
-        console.log({
-            dealType,
-            topDeal,
-            offerType,
-            selectedProducts,
-        });
+    const handleSubmit = async () => {
+        try {
+            const payload = {
+                dealType,
+                todaySpecial: toggleTopDeal,
+                offerType,
+                productIds: selectedProducts,
+                startDate: document.querySelector('[name="top_deals_start_date"]').value,
+                endDate: document.querySelector('[name="top_deals_end_date"]').value,
+                startTime: document.querySelector('[name="top_deals_start_time"]').value,
+                endTime: document.querySelector('[name="top_deals_end_time"]').value,
+                discount: document.querySelector('[name="amount"]').value,
+            };
+
+            await axios.post(`${import.meta.env.VITE_BASE_URL}/top-deals`, payload, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            fetchTopDeals(); // refresh the list
+        } catch (error) {
+            console.error("Failed to save top deal", error);
+        }
     };
 
-    const initialData = [
-        { id: 1, product: "Pineapple (1 piece)", created: "May 21, 2024 11:08 AM", updated: "Apr 08, 2025 08:10 PM" },
-        { id: 2, product: "Green Grapes", created: "May 21, 2024 11:22 AM", updated: "Apr 09, 2025 02:40 AM" },
-        { id: 3, product: "Hybrid Tomato", created: "May 21, 2024 11:37 AM", updated: "Apr 08, 2025 04:50 AM" },
-        { id: 4, product: "Let's Try Ragi Kaju Pista Cookies", created: "Jun 18, 2024 11:05 AM", updated: "Apr 05, 2025 04:14 PM" },
-        { id: 5, product: "Meatzza Fresh Mince Chicken Keema (Frozen)", created: "Jun 19, 2024 06:48 AM", updated: "Apr 09, 2025 03:22 AM" },
-        { id: 6, product: "Chicken Wings With Skin -500gm", created: "Jun 19, 2024 07:28 AM", updated: "Apr 07, 2025 09:49 AM" },
-        { id: 7, product: "Lay's India's Magic Masala Potato Chips (40 g)", created: "Jun 19, 2024 07:51 AM", updated: "Apr 06, 2025 04:33 PM" },
-        { id: 8, product: "Nescafe Classic Instant Coffee - Pack of 60 Sachet", created: "Jun 19, 2024 07:57 AM", updated: "Apr 08, 2025 11:06 AM" },
-        { id: 9, product: "Red Bull Energy Drink", created: "Jun 21, 2024 10:15 AM", updated: "Apr 08, 2025 11:26 AM" },
-        { id: 10, product: "Amul Gold Full Cream Fresh Milk", created: "Jun 21, 2024 11:09 AM", updated: "Apr 05, 2025 02:22 AM" },
-    ];
+    const fetchTopDeals = async () => {
+        try {
+            const { data } = await axios.get(`${import.meta.env.VITE_BASE_URL}/top-deals`);
+            setFetchedTopDeals(data);
+        } catch (error) {
+            console.error("Failed to fetch sliders", error);
+        }
+    };
 
-    const [sliders, setSliders] = useState(initialData);
+    useEffect(() => {
+        fetchTopDeals();
+    }, []);
+
+    const handleDelete = async (id) => {
+        if (window.confirm("Are you sure you want to delete this slider?")) {
+            try {
+                await axios.delete(`${import.meta.env.VITE_BASE_URL}/top-deals/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                });
+                setFetchedTopDeals(prev => prev.filter(slider => slider._id !== id));
+            } catch (err) {
+                console.error("Failed to delete slider", err);
+            }
+        }
+    };
+
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
 
     // Filter categories based on search
-    const filteredSliders = sliders.filter(slider =>
-        slider.product.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredTopDeals = fetchedTopDeals.filter(topDeal =>
+        (topDeal.name && topDeal.name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
-    const totalPages = Math.ceil(filteredSliders.length / rowsPerPage);
+    const totalPages = Math.ceil(filteredTopDeals.length / rowsPerPage);
     const indexOfLast = currentPage * rowsPerPage;
     const indexOfFirst = indexOfLast - rowsPerPage;
     // Only show the rows on the current page
-    const currentSliders = filteredSliders.slice(indexOfFirst, indexOfLast);
+    const currentTopDeals = filteredTopDeals.slice(indexOfFirst, indexOfLast);
 
     const handlePrev = () => {
         if (currentPage > 1) setCurrentPage(prev => prev - 1);
@@ -82,6 +113,7 @@ export default function TopDeal() {
                             <label className="block font-medium mb-1">
                                 Deals Type <span className="text-red-500">*</span>
                             </label>
+
                             <select
                                 className="w-full border rounded px-3 py-2"
                                 value={dealType}
@@ -101,16 +133,16 @@ export default function TopDeal() {
                                     id="top_deals_switch"
                                     type="checkbox"
                                     className="w-5 h-5"
-                                    checked={topDeal}
-                                    onChange={() => setTopDeal(!topDeal)}
+                                    checked={toggleTopDeal}
+                                    onChange={() => setToggleTopDeal(!toggleTopDeal)}
                                 />
                                 <label htmlFor="top_deals_switch" className="cursor-pointer">
-                                    {topDeal ? "On" : "Off"}
+                                    {toggleTopDeal ? "On" : "Off"}
                                 </label>
                             </div>
                         </div>
 
-                        {topDeal && (
+                        {toggleTopDeal && (
                             <>
                                 <div>
                                     <label className="block font-medium mb-1">
@@ -251,22 +283,19 @@ export default function TopDeal() {
                                     <th className="border px-4 py-2 text-left">Action</th>
                                 </tr>
                             </thead>
-                            <tbody
-                            >
-                                {currentSliders.map((slider, idx) => (
-                                    <tr
-                                        className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}
-                                    >
+                            <tbody>
+                                {currentTopDeals.map((deal, idx) => (
+                                    <tr className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"} key={deal._id}>
                                         <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
-                                        <td className="border px-4 py-2">{slider.product}</td>
-                                        <td className="border px-4 py-2">{slider.created}</td>
-                                        <td className="border px-4 py-2">{slider.updated}</td>
+                                        <td className="border px-4 py-2">
+                                            {deal.products?.map((p) => p.productId?.name).join(", ")}
+                                        </td>
+
+                                        <td className="border px-3 py-2">{new Date(deal.createdAt).toLocaleString()}</td>
+                                        <td className="border px-3 py-2">{new Date(deal.updatedAt).toLocaleString()}</td>
                                         <td className="border px-4 py-2 text-white">
                                             <div className="flex items-center gap-2">
-                                                <Link to={`/admin/slider-${slider.id}`} className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md" title="Edit">
-                                                    <FaEdit />
-                                                </Link>
-                                                <button className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
+                                                <button onClick={() => handleDelete(deal._id)} className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
                                                     <FaTrash />
                                                 </button>
                                             </div>
@@ -274,6 +303,7 @@ export default function TopDeal() {
                                     </tr>
                                 ))}
                             </tbody>
+
                         </table>
 
                     </div>
@@ -282,10 +312,10 @@ export default function TopDeal() {
                     <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
                         <div>
                             Showing{" "}
-                            {filteredSliders.length === 0
+                            {currentTopDeals.length === 0
                                 ? "0 to 0"
-                                : `${indexOfFirst + 1} to ${Math.min(indexOfLast, filteredSliders.length)}`}{" "}
-                            of {filteredSliders.length} entries
+                                : `${indexOfFirst + 1} to ${Math.min(indexOfLast, currentTopDeals.length)}`}{" "}
+                            of {currentTopDeals.length} entries
 
                         </div>
                         <div className="space-x-2">
@@ -310,4 +340,3 @@ export default function TopDeal() {
         </CommonLayout>
     )
 }
-

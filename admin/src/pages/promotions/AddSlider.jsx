@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import CommonLayout from '../../components/layout/CommonLayout';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
@@ -8,7 +8,13 @@ import { useProduct } from '../../hook/useProduct';
 
 export default function AddSlider() {
     const { categories } = useCategory();
-    const { products } = useProduct();
+    const { token } = useAuth();
+    const { products, fetchAllProducts } = useProduct();
+
+    useEffect(() => {
+      fetchAllProducts();
+    }, []);
+    
     const [type, setType] = useState('');
     const [formData, setFormData] = useState({
         title: '',
@@ -21,7 +27,10 @@ export default function AddSlider() {
         description: '',
     });
 
+    const { id } = useParams();
     const navigate = useNavigate();
+    const [imageUrl, setImageUrl] = useState('');
+
 
     const handleTypeChange = (e) => {
         const value = e.target.value;
@@ -34,24 +43,76 @@ export default function AddSlider() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        setFormData(prev => ({ ...prev, image: file }));
-    };
+    useEffect(() => {
+        if (!id) return;
 
-    const handleSubmit = (e) => {
+        const fetchSlider = async () => {
+          try {
+            const res = await axios.get(
+              `${import.meta.env.VITE_BASE_URL}/sliders/${id}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            const s = res.data;
+
+            setFormData({
+                title: s.title || '',
+                image: null,
+                type: s.type || '',
+                cat_id: s.category?._id || '',
+                item_id: s.product?._id || '',
+                custom_link: s.customLink || '',
+                link_text: s.textLink || '',
+                description: s.description || '',
+              });
+              setType(s.type || '');
+              setImageUrl(s.image);
+          } catch (err) {
+            console.error('Failed to load slider:', err);
+          }
+        };
+
+        fetchSlider();
+      }, [id, token]);
+
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // You can add form validation here if needed
-        console.log('Form Submitted:', formData);
-        navigate('/admin/slider');
-    };
+
+        const payload = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+          if (value) payload.append(key, value);
+        });
+
+        try {
+          const config = {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          };
+
+          if (id) {
+            await axios.put(`${import.meta.env.VITE_BASE_URL}/sliders/${id}`, payload, config);
+        } else {
+            await axios.post(`${import.meta.env.VITE_BASE_URL}/sliders`, payload, config);
+        }
+
+
+          navigate('/admin/slider');
+        } catch (err) {
+          console.error('Slider save error:', err);
+          alert('Something went wrong!');
+        }
+      };
+
 
     return (
         <CommonLayout>
             <div className="flex flex-col gap-5 p-5">
                 <div className="flex justify-between md:flex-row flex-col gap-3 md:items-center">
                     <h1 className="text-2xl font-semibold">
-                        <Link to="/admin/slider">Sliders</Link> / Add New
+                        <Link to="/admin/slider">Sliders</Link> / {id ? 'Update' : 'Add New'}
                     </h1>
                 </div>
 
@@ -81,10 +142,24 @@ export default function AddSlider() {
                                     type="file"
                                     name="image"
                                     accept="image/*"
-                                    onChange={handleFileChange}
-                                    required
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        setFormData(prev => ({ ...prev, image: file }));
+                                        if (file) {
+                                            setImageUrl(URL.createObjectURL(file));
+                                        }
+                                    }}
                                     className="w-full mt-2 border border-gray-300 bg-transparent text-gray-700 rounded px-3 py-1 file:mr-3 file:py-1 file:px-4 cursor-pointer file:border-0 file:border-r file:border-gray-100 file:text-sm file:bg-transparent file:text-gray-700"
                                 />
+                                {imageUrl && (
+                                    <div className="mt-3">
+                                        <img
+                                            src={imageUrl}
+                                            alt="Slider Preview"
+                                            className="w-40 h-auto border rounded shadow"
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             {/* Type */}
@@ -97,14 +172,15 @@ export default function AddSlider() {
                                     className="w-full border rounded px-3 py-2 bg-white"
                                 >
                                     <option value="">Select</option>
-                                    <option value="1">Category</option>
-                                    <option value="2">Product</option>
-                                    <option value="3">Custom Link</option>
+                                    <option value="category">Category</option>
+                                    <option value="product">Product</option>
+                                    <option value="custom-link">Custom Link</option>
                                 </select>
                             </div>
 
+
                             {/* Conditional Category */}
-                            {type === "1" && (
+                            {type === "category" && (
                                 <div>
                                     <label className="block text-sm font-medium mb-1">
                                         Category <span className="text-red-500">*</span>
@@ -126,7 +202,7 @@ export default function AddSlider() {
                             )}
 
                             {/* Conditional Product */}
-                            {type === "2" && (
+                            {type === "product" && (
                                 <div>
                                     <label className="block text-sm font-medium mb-1">
                                         Product <span className="text-red-500">*</span>
@@ -148,7 +224,7 @@ export default function AddSlider() {
                             )}
 
                             {/* Conditional Custom Link */}
-                            {type === "3" && (
+                            {type === "custom-link" && (
                                 <div>
                                     <label className="block text-sm font-medium mb-1">
                                         Custom Link <span className="text-red-500">*</span>

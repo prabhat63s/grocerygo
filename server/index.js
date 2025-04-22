@@ -21,6 +21,7 @@ import blogRoutes from './routes/blogRoutes.js';
 import tutorialRoutes from './routes/tutorialRoutes.js';
 import bannerRoutes from './routes/bannerRoutes.js';
 import sliderRoutes from './routes/sliderRoutes.js';
+import topDealRoutes from './routes/topDealRoutes.js';
 
 // Configure environment variables
 dotenv.config();
@@ -61,6 +62,7 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/tutorial", tutorialRoutes);
 app.use('/api/banner', bannerRoutes);
 app.use("/api/sliders", sliderRoutes);
+app.use('/api/top-deals', topDealRoutes);
 
 // Start the server
 app.listen(PORT, () => {

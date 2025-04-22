@@ -2,17 +2,35 @@ import Slider from "../models/sliderModel.js";
 
 // Create Slider
 export const createSlider = async (req, res) => {
-   const { title, textLink, description, type, product, category, customLink, status, } = req.body;
-
-   const domainName = req.protocol + "://" + req.get("host");
-   const image = req.file ? `${domainName}/uploads/sliders/${req.file.filename}` : "";
-   const slider = new Slider({ title, textLink, description, image, type, product, category, customLink, status, });
-
    try {
-      const newSlider = await slider.save();
-      res.status(201).json(newSlider);
+      const {
+         title,
+         type,
+         cat_id,
+         item_id,
+         custom_link,
+         link_text,
+         description
+      } = req.body;
+
+      const domainName = req.protocol + "://" + req.get("host");
+      const image = req.file ? `${domainName}/uploads/sliders/${req.file.filename}` : "";
+
+      const newSlider = new Slider({
+         title,
+         type,
+         textLink: link_text,
+         description,
+         image,
+         product: type === 'product' ? item_id : null,
+         category: type === 'category' ? cat_id : null,
+         customLink: type === 'custom-link' ? custom_link : null,
+      });
+
+      await newSlider.save();
+      res.status(201).json({ ...newSlider._doc, image });
    } catch (err) {
-      res.status(400).json({ message: err.message });
+      res.status(500).json({ message: err.message });
    }
 };
 
@@ -34,37 +52,70 @@ export const getSliderById = async (req, res) => {
       const slider = await Slider.findById(req.params.id)
          .populate('product', 'name')
          .populate('category', 'name');
+
       if (!slider) {
          return res.status(404).json({ message: 'Slider not found' });
       }
-      res.json({ message: "Successfull Get" });
+
+      res.json(slider);
    } catch (err) {
       res.status(500).json({ message: err.message });
    }
 };
 
-// Update Slider
+// update Slider
 export const updateSlider = async (req, res) => {
    try {
-      const { title, textLink, description, type, product, category, customLink, status, } = req.body;
+      const { id } = req.params;
+      const {
+         title,
+         type,
+         cat_id,
+         item_id,
+         custom_link,
+         link_text,
+         description
+      } = req.body;
 
       const domainName = req.protocol + "://" + req.get("host");
-      const image = req.file ? `${domainName}/uploads/sliders/${req.file.filename}` : null;
+      const image = req.file ? `${domainName}/uploads/sliders/${req.file.filename}` : "";
 
-      const updateData = { title, textLink, description, type, product, category, customLink, status, };
 
-      if (image) {
-         updateData.image = image;
-      }
+      const updateData = {
+         title,
+         type,
+         textLink: link_text,
+         description,
+         product: type === 'product' ? item_id : null,
+         category: type === 'category' ? cat_id : null,
+         customLink: type === 'custom-link' ? custom_link : null,
+      };
 
-      const slider = await Slider.findByIdAndUpdate(req.params.id, updateData, { new: true });
-      if (!slider) {
-         return res.status(404).json({ message: 'Slider not found' });
-      }
+      if (image) updateData.image = image;
 
-      res.json({ message: 'Update successfully', slider });
+      const updated = await Slider.findByIdAndUpdate(id, updateData, { new: true });
+      if (!updated) return res.status(404).json({ message: "Slider not found" });
+
+      res.json({ ...updated._doc, image });
    } catch (err) {
-      res.status(400).json({ message: err.message });
+      res.status(500).json({ message: err.message });
+   }
+};
+
+
+// Toggle slider Status
+export const toggleSliderStatus = async (req, res) => {
+   try {
+      const slider = await Slider.findById(req.params.id);
+      if (!slider) return res.status(404).json({ message: "slider not found" });
+
+      slider.status = !slider.status;
+      await slider.save();
+
+      res.status(200).json({ message: "slider status updated", status: slider.status });
+   } catch (err) {
+      console.error("Toggle Status Error:", err);
+      res.status(500).json({ message: "Server error" });
    }
 };
 

@@ -4,6 +4,7 @@ import { FaCheck, FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { FaX } from 'react-icons/fa6';
 
 export default function Coupons() {
     const { token } = useAuth();
@@ -40,6 +41,16 @@ export default function Coupons() {
             fetchCoupons();
         } catch (error) {
             console.error('Delete failed:', error);
+        }
+    };
+
+    // toggle status of a category
+    const handleToggleStatus = async (id) => {
+        try {
+            await axios.patch(`${import.meta.env.VITE_BASE_URL}/coupons/${id}/toggle-status`);
+            fetchCoupons();
+        } catch (err) {
+            console.error("Status toggle failed:", err);
         }
     };
 
@@ -122,8 +133,11 @@ export default function Coupons() {
                                         <td className="border px-4 py-2">{coupon.code}</td>
                                         <td className="border px-4 py-2">{coupon.discount}</td>
                                         <td className="border px-4 py-2">
-                                            <span className="bg-green-500 text-white text-xs inline-flex items-center justify-center p-1.5 rounded">
-                                                <FaCheck className="text-sm" />
+                                            <span
+                                                onClick={() => handleToggleStatus(coupon._id)}
+                                                className={`text-white w-fit p-1.5 rounded-md flex items-center justify-center cursor-pointer ${coupon.status ? "bg-green-500" : "bg-red-500"}`}
+                                            >
+                                                {coupon.status ? <FaCheck /> : <FaX />}
                                             </span>
                                         </td>
                                         <td className="border px-3 py-2">{new Date(coupon.createdAt || coupon.created).toLocaleString()}</td>

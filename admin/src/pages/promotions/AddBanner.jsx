@@ -7,105 +7,114 @@ import useCategory from '../../hook/useCategory';
 import { useProduct } from '../../hook/useProduct';
 
 export default function AddBanner() {
-  const { id, bannerId } = useParams();
   const { token } = useAuth();
-  const { categories } = useCategory();
-  const { products } = useProduct();
-
-  console.log(categories)
-  console.log(products)
+  const { type, bannerId } = useParams();
+  const [bannerData, setBannerData] = useState(null);
+  const [selectedType, setSelectedType] = useState("");
+  const [selectedValue, setSelectedValue] = useState("");
+  const [previewImage, setPreviewImage] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const [bannerImage, setBannerImage] = useState(null);
-  const [selectedType, setSelectedType] = useState(""); // 1: categories, 2: products
-  const [selectedValue, setSelectedValue] = useState("");
-  const [previewImage, setPreviewImage] = useState('');
-  const [loading, setLoading] = useState(false);
+  // Fetch categories and products
+  const { categories } = useCategory();
+  const { products, fetchAllProducts } = useProduct();
 
-  const isEditMode = !!bannerId;
+    useEffect(() => {
+      fetchAllProducts();
+    }, []);
 
   useEffect(() => {
-    const fetchBanner = async () => {
-      if (!isEditMode || !token) return;
-      try {
-        const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/banner/${bannerId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const banner = res.data;
-        setSelectedType(banner.type || '');
-        setSelectedValue(banner.category || banner.product || '');
-        setPreviewImage(banner.bannerImage);
-      } catch (err) {
-        console.error('Failed to fetch banner:', err);
-      }
-    };
+    if (bannerId) {
+      const fetchBanner = async () => {
+        try {
+          const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/banner/${bannerId}`);
+          setBannerData(response.data);
+          setSelectedType(response.data.type);
+          setSelectedValue(response.data.value);
+          if (response.data.bannerImage) {
+            setPreviewImage(response.data.bannerImage);
+          }
+        } catch (error) {
+          console.error('Error fetching banner:', error);
+        }
+      };
 
-    fetchBanner();
-  }, [bannerId, token]);
+      fetchBanner();
+    } else {
+      setBannerData({
+        category: '',
+        product: '',
+        status: true,
+      });
+    }
+  }, [bannerId]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setBannerImage(file);
       setPreviewImage(URL.createObjectURL(file));
+      setBannerData({ ...bannerData, bannerImage: file });
     }
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedType || !selectedValue || (!bannerImage && !isEditMode)) return;
+    setLoading(true);
 
     const formData = new FormData();
-    formData.append('type', selectedType);
-    formData.append('section', id.split('-')[1]);
+
+    formData.append('type', type);
+    formData.append('status', bannerData.status);
+    formData.append('bannerImage', bannerData.bannerImage);
+    formData.append('section', type.split('-')[1]);
+
     if (selectedType === "1") {
       formData.append('category', selectedValue);
-    } else {
+    } else if (selectedType === "2") {
       formData.append('product', selectedValue);
     }
-    if (bannerImage) formData.append('bannerImage', bannerImage);
 
     try {
-      setLoading(true);
-      if (isEditMode) {
+      if (bannerId) {
         await axios.put(`${import.meta.env.VITE_BASE_URL}/banner/${bannerId}`, formData, {
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data',
-          },
+            Authorization: `Bearer ${token}`,
+          }
         });
       } else {
         await axios.post(`${import.meta.env.VITE_BASE_URL}/banner`, formData, {
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
           },
         });
       }
-      navigate(`/admin/banner/${id}`);
+      navigate(`/admin/${type}`);
     } catch (error) {
-      console.error('Submit failed:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error saving banner:', error);
     }
+
+    setLoading(false);
   };
 
-  const sectionTitle = id
-    .replace(/-/g, ' ')
-    .replace(/bannersection/i, 'Banner Section')
-    .replace(/\b\w/g, char => char.toUpperCase());
+
 
   return (
     <CommonLayout>
       <div className="flex flex-col gap-5 p-5">
         <div className="flex justify-between md:flex-row flex-col gap-3 md:items-center">
           <h1 className="text-2xl font-semibold">
-            <Link to={`/admin/banner/${id}`}>{sectionTitle}</Link> / {isEditMode ? 'Edit' : 'Add New'}
+            <Link to={`/admin/${type}`}>
+              {type.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())}
+            </Link> / {bannerId ? 'Edit' : 'Add New'}
           </h1>
         </div>
         <div className="bg-white p-6 rounded shadow">
           <form onSubmit={handleSubmit} encType="multipart/form-data">
-            <input type="hidden" name="section" value={id.split('-')[1]} />
+            <input type="hidden" name="section" value={type.split('-')[1]} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Image Upload */}
@@ -174,7 +183,7 @@ export default function AddBanner() {
                     required
                   >
                     <option value="">Select Product</option>
-                    {products?.map(prod => (
+                    {products.map(prod => (
                       <option key={prod._id} value={prod._id}>
                         {prod.name}
                       </option>
@@ -187,7 +196,7 @@ export default function AddBanner() {
             {/* Actions */}
             <div className="mt-6 flex justify-end gap-3">
               <Link
-                to={`/admin/banner/${id}`}
+                to={`/admin/${type}`}
                 className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
               >
                 Cancel

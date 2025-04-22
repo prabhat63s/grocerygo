@@ -20,6 +20,11 @@ const couponSchema = new mongoose.Schema({
         enum: ["limited", "unLimited"],
         required: true,
     },
+    usageLimit: {
+        type: Number,
+        required: function() { return this.usageType === 'limited'; },
+        min: 1,
+    },
     code: {
         type: String,
         required: true,

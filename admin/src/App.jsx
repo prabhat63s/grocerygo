@@ -133,9 +133,9 @@ export default function App() {
               <Route path="add" element={<AddSlider />} />
               <Route path=":id" element={<AddSlider />} />
             </Route>
-            <Route path=":id" element={<Banner />} />
-            <Route path=":id/:id" element={<AddBanner />} />
-
+            <Route path=":type" element={<Banner />} />  {/* displaying banners */}
+            <Route path=":type/add" element={<AddBanner />} />  {/* adding new banners */}
+            <Route path=":type/:bannerId" element={<AddBanner />} />  {/* editing existing banners */}
             <Route path="promocode">
               <Route index element={<Coupons />} />
               <Route path="add" element={<AddCoupons />} />

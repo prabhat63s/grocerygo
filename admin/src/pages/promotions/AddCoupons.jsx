@@ -15,7 +15,7 @@ export default function AddCoupons() {
         discount: '',
         usageType: '',
         usageLimit: '',
-        couponCode: '',
+        code: '',
         minAmount: '',
         startDate: '',
         endDate: '',
@@ -103,8 +103,8 @@ export default function AddCoupons() {
                                         className="w-full border mt-2 rounded px-3 py-2"
                                     >
                                         <option value="">Select</option>
-                                        <option value="1">Fixed</option>
-                                        <option value="2">Percentage</option>
+                                        <option value="fixed">Fixed</option>
+                                        <option value="percentage">Percentage</option>
                                     </select>
                                 </div>
                                 <div>
@@ -131,12 +131,12 @@ export default function AddCoupons() {
                                     className="w-full border mt-2 rounded px-3 py-2"
                                 >
                                     <option value="">Select</option>
-                                    <option value="1">Limited</option>
-                                    <option value="2">Unlimited</option>
+                                    <option value="limited">Limited</option>
+                                    <option value="unlimited">Unlimited</option>
                                 </select>
                             </div>
 
-                            {form.usageType === '1' && (
+                            {form.usageType === 'limited' && (
                                 <div>
                                     <label className="block font-medium">Coupon Usage Limit <span className="text-red-500">*</span></label>
                                     <input
@@ -158,8 +158,8 @@ export default function AddCoupons() {
                                     <label className="block font-medium">Coupon Code <span className="text-red-500">*</span></label>
                                     <input
                                         type="text"
-                                        name="couponCode"
-                                        value={form.couponCode}
+                                        name="code"
+                                        value={form.code}
                                         onChange={handleChange}
                                         placeholder="Coupon Code"
                                         required
