@@ -57,14 +57,14 @@ export default function Sidebar({ setOpenSidebar }) {
                     <div className="flex gap-2 items-center"><IoHomeSharp /> Dashboard</div>
                 </Link>
 
-                <Link to='/admin/systemaddons' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/systemaddons' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                {/* <Link to='/admin/systemaddons' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/systemaddons' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><IoExtensionPuzzleSharp /> Addons Manager</div>
                     <span className="text-transparent bg-clip-text bg-200 animate-rainbow font-black text-xs" style={{ backgroundImage: 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)', }}> Premium </span>
-                </Link>
+                </Link> */}
             </div>
 
             {/* POS SYSTEM */}
-            <div className="py-4 w-full flex flex-col gap-2">
+            {/* <div className="py-4 w-full flex flex-col gap-2">
                 <h1 className="text-xs md:text-sm font-medium text-gray-500">POS SYSTEM </h1>
                 <Link onClick={() => setIsDropdownOpen(!isDropdownOpen)} className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaShoppingBag /> POS <span className="bg-[#dc3545] text-xs px-2 py-[2px] text-white rounded-md">Addon</span></div>
@@ -84,10 +84,10 @@ export default function Sidebar({ setOpenSidebar }) {
                     </div>
                 )}
 
-            </div>
+            </div> */}
 
             {/* Order Management */}
-            <div className="py-4 w-full flex flex-col gap-2">
+            {/* <div className="py-4 w-full flex flex-col gap-2">
                 <h1 className="text-xs md:text-sm font-medium text-gray-500">Order Management</h1>
                 <Link to="/admin/orders" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/orders' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaCartShopping />Orders </div>
@@ -95,7 +95,7 @@ export default function Sidebar({ setOpenSidebar }) {
                 <Link to='/admin/report' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/report' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaChartLine /> Report</div>
                 </Link>
-            </div>
+            </div> */}
 
             {/* Product Management */}
             <div className="py-4 w-full flex flex-col gap-2">
@@ -109,16 +109,16 @@ export default function Sidebar({ setOpenSidebar }) {
                 <Link to="/admin/tax" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/tax' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaCashRegister />Tax </div>
                 </Link>
-                <Link to='/admin/extras' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/extras' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                {/* <Link to='/admin/extras' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/extras' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><GoDotFill /> Global Extras</div>
-                </Link>
+                </Link> */}
                 <Link to="/admin/item" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/item' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaListCheck />Products </div>
                 </Link>
-                <Link to='/admin/product_review' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/product_review' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                {/* <Link to='/admin/product_review' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/product_review' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaStar /> Product Reviews </div>
                     <span className="bg-[#dc3545] text-xs px-2 py-[2px] text-white rounded-md">Addon</span>
-                </Link>
+                </Link> */}
                 <Link to="/admin/item/import" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/item/import' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaListCheck />Bulk import products </div>
                     <span className="bg-[#dc3545] text-xs px-2 py-[2px] text-white rounded-md">Addon</span>
@@ -139,16 +139,16 @@ export default function Sidebar({ setOpenSidebar }) {
                     <div
                         className="pl-4 flex flex-col gap-2 transform transition-all duration-300 ease-out animate-slideDown"
                     >
-                        <Link to='/admin/banner-section-1' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner-section-1' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                        <Link to='/admin/banner/banner-section-1' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner/banner-section-1' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                             <div className="flex gap-2 items-center"><GoDotFill />Banner Section 1</div>
                         </Link>
-                        <Link to='/admin/banner-section-2' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner-section-2' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                        <Link to='/admin/banner/banner-section-2' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner/banner-section-2' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                             <div className="flex gap-2 items-center"><GoDotFill />Banner Section 2</div>
                         </Link>
-                        <Link to='/admin/banner-section-3' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner-section-3' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                        <Link to='/admin/banner/banner-section-3' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner/banner-section-3' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                             <div className="flex gap-2 items-center"><GoDotFill />Banner Section 3</div>
                         </Link>
-                        <Link to='/admin/banner-section-4' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner-section-4' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                        <Link to='/admin/banner/banner-section-4' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/banner/banner-section-4' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                             <div className="flex gap-2 items-center"><GoDotFill />Banner Section 4</div>
                         </Link>
                     </div>
@@ -156,10 +156,10 @@ export default function Sidebar({ setOpenSidebar }) {
                 <Link to="/admin/promocode" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/promocode' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaTag />Coupons </div>
                 </Link>
-                <Link to='/admin/firebase' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/firebase' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                {/* <Link to='/admin/firebase' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/firebase' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaBell />  Firebase Notification </div>
                     <span className="bg-[#dc3545] text-xs px-2 py-[2px] text-white rounded-md">Addon</span>
-                </Link>
+                </Link> */}
                 <Link to="/admin/top_deals" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/top_deals' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><LuBadgePercent />Top Deal </div>
                     <span className="bg-[#dc3545] text-xs px-2 py-[2px] text-white rounded-md">Addon</span>
@@ -170,7 +170,7 @@ export default function Sidebar({ setOpenSidebar }) {
             {/* Restaurant Management */}
             <div className="py-4 w-full flex flex-col gap-2">
                 <h1 className="text-xs md:text-sm font-medium text-gray-500">Restaurant Management</h1>
-                <Link to="/admin/time" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/time' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                {/* <Link to="/admin/time" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/time' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaBusinessTime />Working Hours </div>
                 </Link>
                 <Link to='/admin/custom_status' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/custom_status' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
@@ -183,7 +183,7 @@ export default function Sidebar({ setOpenSidebar }) {
                 <Link to='/admin/reviews' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/reviews' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaStar /> Store Reviews </div>
                     <span className="bg-[#dc3545] text-xs px-2 py-[2px] text-white rounded-md">Addon</span>
-                </Link>
+                </Link> */}
                 <Link to="/admin/contact" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/contact' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaAddressBook />Enquiries </div>
                 </Link>
@@ -193,7 +193,7 @@ export default function Sidebar({ setOpenSidebar }) {
             </div>
 
             {/* User Management */}
-            <div className="py-4 w-full flex flex-col gap-2">
+            {/* <div className="py-4 w-full flex flex-col gap-2">
                 <h1 className="text-xs md:text-sm font-medium text-gray-500">User Management</h1>
                 <Link to="/admin/users" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/users' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaUsers />Customers</div>
@@ -202,10 +202,10 @@ export default function Sidebar({ setOpenSidebar }) {
                 <Link to='/admin/driver' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/driver' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaMotorcycle /> Delivery Man</div>
                 </Link>
-            </div>
+            </div> */}
 
             {/* Employee Management */}
-            <div className="py-4 w-full flex flex-col gap-2">
+            {/* <div className="py-4 w-full flex flex-col gap-2">
                 <h1 className="text-xs md:text-sm font-medium text-gray-500">Employee Management</h1>
                 <Link to="/admin/roles" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/roles' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaUserSecret />Employee Roles</div>
@@ -215,7 +215,7 @@ export default function Sidebar({ setOpenSidebar }) {
                     <div className="flex gap-2 items-center"><FaUsers /> Employee</div>
                     <span className="bg-[#dc3545] text-xs px-2 py-[2px] text-white rounded-md">Addon</span>
                 </Link>
-            </div>
+            </div> */}
 
             {/* System settings */}
             <div className="py-4 w-full flex flex-col gap-2">
@@ -229,16 +229,16 @@ export default function Sidebar({ setOpenSidebar }) {
                     <div
                         className="pl-4 flex flex-col gap-2 transform transition-all duration-300 ease-out animate-slideDown"
                     >
-                        <Link to='/admin/about' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/about' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                        <Link to='/admin/pages/about' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/pages/about' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                             <div className="flex gap-2 items-center"><GoDotFill /> About Us</div>
                         </Link>
-                        <Link to='/admin/privacypolicy' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/privacypolicy' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                        <Link to='/admin/pages/privacypolicy' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/pages/privacypolicy' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                             <div className="flex gap-2 items-center"><GoDotFill /> Privacy Policy</div>
                         </Link>
-                        <Link to='/admin/refundpolicy' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/refundpolicy' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                        <Link to='/admin/pages/refundpolicy' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/pages/refundpolicy' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                             <div className="flex gap-2 items-center"><GoDotFill /> Refund Policy</div>
                         </Link>
-                        <Link to='/admin/termsAndConditions' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/termsAndConditions' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                        <Link to='/admin/pages/termsAndConditions' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/pages/termsAndConditions' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                             <div className="flex gap-2 items-center"><GoDotFill /> Terms & Conditions</div>
                         </Link>
                     </div>
@@ -262,20 +262,20 @@ export default function Sidebar({ setOpenSidebar }) {
                 <Link to="/admin/subscribers" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/subscribers' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaCartShopping />Email Subscribers </div>
                 </Link>
-                <Link to="/admin/settings" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/settings' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                {/* <Link to="/admin/settings" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/settings' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaEnvelope />General Settings </div>
-                </Link>
-                <Link to="/admin/whatsapp_settings" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/whatsapp_settings' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                </Link> */}
+                {/* <Link to="/admin/whatsapp_settings" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/whatsapp_settings' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaWhatsapp />Whatsapp settings </div>
                     <span className="bg-[#dc3545] text-xs px-2 py-[2px] text-white rounded-md">Addon</span>
-                </Link>
+                </Link> */}
                 <Link to='/admin/share' className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/share' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaShare /> Share</div>
                 </Link>
-                <Link to="/admin/language-settings" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/language-settings' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
+                {/* <Link to="/admin/language-settings" className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/language-settings' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><FaLanguage />Language </div>
                     <span className="bg-[#dc3545] text-xs px-2 py-[2px] text-white rounded-md">Addon</span>
-                </Link>
+                </Link> */}
                 <Link onClick={handleClearCache} className={`flex justify-between items-center rounded-md text-xs md:text-sm px-2 py-1.5 ${location === '/admin/report' ? "bg-white text-black" : "bg-black text-gray-300 hover:bg-white hover:text-black"}  w-full`}>
                     <div className="flex gap-2 items-center"><IoRefreshCircleSharp /> Clear Cache</div>
                 </Link>

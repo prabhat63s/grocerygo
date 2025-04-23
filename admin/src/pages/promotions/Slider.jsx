@@ -20,7 +20,6 @@ export default function Slider() {
             console.error("Failed to fetch sliders", error);
         }
     };
-
     useEffect(() => {
         fetchSliders();
     }, []);

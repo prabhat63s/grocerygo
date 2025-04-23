@@ -18,11 +18,18 @@ export const createProduct = async (req, res) => {
       return res.status(400).json({ message: "Name, category, type, prices and at least one image are required." });
     }
 
-    let parsedExtras = [], parsedVariants = [], parsedStockManagement = [];
+    let parsedExtras = [], parsedVariants = [], parsedStockManagement = [], parsedTax = [];
     try {
       parsedExtras = extras ? JSON.parse(extras) : [];
       parsedVariants = variants ? JSON.parse(variants) : [];
       parsedStockManagement = stock ? JSON.parse(stock) : [];
+      parsedTax = tax ? Array.isArray(tax) ? tax : [tax] : [];
+
+      // Ensure attributes remain as Map
+      parsedVariants = parsedVariants.map(variant => ({
+        ...variant,
+        attributes: new Map(Object.entries(variant.attributes || {}))
+      }));
     } catch (err) {
       return res.status(400).json({ message: "Invalid JSON format in extras, variants, or stock." });
     }
@@ -121,12 +128,17 @@ export const updateProduct = async (req, res) => {
     } = req.body;
 
     // Parse JSON data for extras, variants, and stockManagement
-    let parsedExtras = [], parsedVariants = [], parsedStockManagement = [], parsedTax = [];
     try {
       parsedExtras = extras ? JSON.parse(extras) : [];
       parsedVariants = variants ? JSON.parse(variants) : [];
       parsedStockManagement = stock ? JSON.parse(stock) : [];
       parsedTax = tax ? Array.isArray(tax) ? tax : [tax] : [];
+
+      // Convert attributes object to Map
+      parsedVariants = parsedVariants.map(variant => ({
+        ...variant,
+        attributes: new Map(Object.entries(variant.attributes || {}))
+      }));
     } catch (err) {
       return res.status(400).json({ message: "Invalid JSON format in extras, variants, or stock." });
     }
@@ -155,12 +167,6 @@ export const updateProduct = async (req, res) => {
     product.description = description || product.description;
     product.tax = parsedTax.length > 0 ? parsedTax : product.tax;
 
-    // Handle image updates (optional, only update if new images are provided)
-    // if (productImage) {
-    //   const domainName = req.protocol + "://" + req.get("host");
-    //   const updatedImages = req.files?.map(file => `${domainName}/uploads/products/${file.filename}`) || [];
-    //   product.productImage = updatedImages.length > 0 ? updatedImages : product.productImage;
-    // }
     if (req.files && req.files.length > 0) {
       const domainName = req.protocol + "://" + req.get("host");
       const updatedImages = req.files.map(file => `${domainName}/uploads/products/${file.filename}`);

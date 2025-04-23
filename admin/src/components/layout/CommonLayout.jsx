@@ -5,7 +5,7 @@ import Header from './Header'
 export default function CommonLayout({ children }) {
     return (
         <div className='flex justify-between w-full h-screen'>
-            <div className="md:w-[20%] hidden md:flex bg-black px-3 pt-5 text-white overflow-auto" style={{ scrollbarWidth: 'none' }}>
+            <div className="md:w-[20%] hidden md:flex bg-black px-3 pt-5 text-white overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
                 <Sidebar />
             </div>
 

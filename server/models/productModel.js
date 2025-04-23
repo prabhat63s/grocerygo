@@ -12,8 +12,9 @@ const extraSchema = new mongoose.Schema({
 });
 
 const variantSchema = new mongoose.Schema({
-    name: {
-        type: String,
+    attributes: {
+        type: Map,
+        of: mongoose.Schema.Types.Mixed,
         required: true
     },
     originalPrice: {
@@ -103,17 +104,40 @@ const productSchema = new mongoose.Schema({
         default: false
     },
     variants: [variantSchema],
+
     originalPrice: {
-        type: Number
+        type: Number,
+        validate: {
+            validator: function (v) {
+                return this.hasVariants || v != null;
+            },
+            message: 'Original price is required when hasVariants is false.'
+        }
     },
     sellingPrice: {
-        type: Number
+        type: Number,
+        validate: {
+            validator: function (v) {
+                return this.hasVariants || v != null;
+            },
+            message: 'Selling price is required when hasVariants is false.'
+        }
     },
+
     stockManagement: {
         type: Boolean,
         default: false
     },
-    stock: [stockManagementSchema],
+    stock: {
+        type: [stockManagementSchema],
+        validate: {
+            validator: function (v) {
+                return this.hasVariants || (Array.isArray(v) && v.length > 0);
+            },
+            message: 'Stock is required when hasVariants is false.'
+        }
+    },
+
     productImage: [{
         type: String
     }],

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
 const topDealSchema = new mongoose.Schema({
     dealType: {
@@ -9,21 +9,25 @@ const topDealSchema = new mongoose.Schema({
     },
     topDeal: {
         type: Boolean,
-        default: true
+        default: false
     },
     offerType: {
         type: String,
         required: true,
-        enum: ["1", "2"], // Fixed, Percentage
+        enum: ["1", "2"],
         default: "2"
     },
     startDate: {
         type: Date,
-        required: true
+        required: function() {
+            return this.topDeal;  
+        }
     },
     endDate: {
         type: Date,
-        required: true
+        required: function() {
+            return this.topDeal;
+        }
     },
     startTime: {
         type: String,
@@ -46,7 +50,7 @@ const topDealSchema = new mongoose.Schema({
     products: [{
         productId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Product", 
+            ref: "Product",
             required: true
         }
     }]

@@ -52,11 +52,13 @@ export default function EmailSubscribers() {
         sub.email.toLowerCase().includes(search.toLowerCase())
     );
 
+
     const totalPages = Math.ceil(filteredSubscribers.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const currentItems = filteredSubscribers.slice(startIndex, endIndex);
 
+    console.log(currentItems)
     const handlePrevPage = () => {
         if (currentPage > 1) setCurrentPage((p) => p - 1);
     };

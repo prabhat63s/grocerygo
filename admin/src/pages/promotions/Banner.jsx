@@ -23,7 +23,7 @@ export default function Banner() {
         `${import.meta.env.VITE_BASE_URL}/banner?type=${type}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log('API Response:', res.data); // Log the response
+      console.log('API Response:', res.data);
       const data = Array.isArray(res.data) ? res.data : res.data.data;
       setBanners(Array.isArray(data) ? data : []);
     } catch (error) {

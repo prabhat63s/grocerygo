@@ -8,8 +8,7 @@ import DeleteConfirmationModal from '../../components/modals/DeleteConfirmationM
 import { toast } from 'sonner';
 
 export default function Products() {
-  const { products, fetchAllProducts, loading, deleteProduct } = useProduct();
-
+  const { products, fetchAllProducts, deleteProduct } = useProduct();
 
   useEffect(() => {
     fetchAllProducts();
@@ -128,7 +127,7 @@ export default function Products() {
                     className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
                   >
                     <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
-                    <td className="border px-4 py-2 flex flex-col">{product?.name} <img src={product?.productImage} alt="" className='h-12' /> <span className="text-[10px] bg-green-500 w-fit px-2 my-1 rounded-md text-white flex items-center gap-1"><FaEye size={14} /> {product.productView}</span> </td>
+                    <td className="border px-4 py-2 flex flex-col">{product?.name} <img src={product?.productImage[0]} alt="" className='h-12' /> <span className="text-[10px] bg-green-500 w-fit px-2 my-1 rounded-md text-white flex items-center gap-1"><FaEye size={14} /> {product.productView}</span> </td>
                     <td className="border px-4 py-2">{product?.category?.name}</td>
                     <td className="border px-4 py-2"> {product.sellingPrice !== "In Variants" ? (<>₹ {product.sellingPrice}</>) : (<span className="bg-blue-400 text-[10px] whitespace-nowrap py-1 px-2 text-white rounded-md">{product.price}</span>)} </td>
                     {/* <td className="border px-4 py-2 space-x-1 whitespace-nowrap">
@@ -189,9 +188,9 @@ export default function Products() {
                     <td className="border px-4 py-2 md:w-32">{new Date(product.updatedAt).toLocaleString()}</td>
                     <td className="border px-4 py-2">
                       <div className="flex flex-col gap-2">
-                        <button className="bg-blue-500 w-fit hover:bg-blue-600 text-white p-1.5 rounded-md">
+                        <Link to={`/admin/item/${product._id}`} className="bg-blue-500 w-fit hover:bg-blue-600 text-white p-1.5 rounded-md">
                           <FaEdit />
-                        </button>
+                        </Link>
                         <button onClick={() => confirmDelete(product._id)} className="bg-red-500 w-fit hover:bg-red-600 text-white p-1.5 rounded-md">
                           <FaTrash />
                         </button>

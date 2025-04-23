@@ -32,10 +32,10 @@ const formats = [
 // Helper to map pathname to type and title
 const getPageInfo = (pathname) => {
     switch (pathname) {
-        case '/admin/about': return { type: 'about', title: 'About Us' };
-        case '/admin/privacypolicy': return { type: 'privacypolicy', title: 'Privacy Policy' };
-        case '/admin/refundpolicy': return { type: 'refundpolicy', title: 'Refund Policy' };
-        case '/admin/termsAndConditions': return { type: 'termsAndConditions', title: 'Terms & Conditions' };
+        case '/admin/pages/about': return { type: 'about', title: 'About Us' };
+        case '/admin/pages/privacypolicy': return { type: 'privacypolicy', title: 'Privacy Policy' };
+        case '/admin/pages/refundpolicy': return { type: 'refundpolicy', title: 'Refund Policy' };
+        case '/admin/pages/termsAndConditions': return { type: 'termsAndConditions', title: 'Terms & Conditions' };
         default: return { type: '', title: '' };
     }
 };

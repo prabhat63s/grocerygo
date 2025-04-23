@@ -133,9 +133,9 @@ export default function App() {
               <Route path="add" element={<AddSlider />} />
               <Route path=":id" element={<AddSlider />} />
             </Route>
-            <Route path=":type" element={<Banner />} />  {/* displaying banners */}
-            <Route path=":type/add" element={<AddBanner />} />  {/* adding new banners */}
-            <Route path=":type/:bannerId" element={<AddBanner />} />  {/* editing existing banners */}
+            {/* <Route path="banner/:type" element={<Banner />} />  displaying banners */}
+            {/* <Route path="banner/:type/add" element={<AddBanner />} />  adding new banners */}
+            {/* <Route path="banner/:type/:bannerId" element={<AddBanner />} />  editing existing banners */}
             <Route path="promocode">
               <Route index element={<Coupons />} />
               <Route path="add" element={<AddCoupons />} />
@@ -192,7 +192,7 @@ export default function App() {
             </Route>
 
             {/* System Settings */}
-            <Route path=":id" element={<AboutUs />} />
+            <Route path="pages/:id" element={<AboutUs />} />
             <Route path="blogs">
               <Route index element={<Blogs />} />
               <Route path="add" element={<AddBlog />} />

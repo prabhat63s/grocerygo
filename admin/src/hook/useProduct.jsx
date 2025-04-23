@@ -28,11 +28,9 @@ export const useProduct = () => {
     const fetchProductById = async (id) => {
         setLoading(true);
         setError(null);
-        console.log(`Fetching product with ID: ${id}`);
         try {
             const { data } = await axios.get(`${BASE_URL}/${id}`);
             setProducts(data.product);
-            console.log("Fetched product:", data.product);
         } catch (err) {
             const message = err.response?.data?.message || "Error fetching product";
             setError(message);
@@ -53,7 +51,6 @@ export const useProduct = () => {
                     "Content-Type": "multipart/form-data"
                 }
             });
-            console.log("Created product:", data.product);
             return data.product;
         } catch (err) {
             const message = err.response?.data?.message || "Error creating product";
@@ -68,7 +65,6 @@ export const useProduct = () => {
     const updateProduct = async (id, formData) => {
         setLoading(true);
         setError(null);
-        console.log(`Updating product ${id} with data:`, formData);
         try {
             const { data } = await axios.put(`${BASE_URL}/${id}`, formData, {
                 headers: {
@@ -76,7 +72,6 @@ export const useProduct = () => {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            console.log("Updated product:", data.product);
             return data.product;
         } catch (err) {
             const message = err.response?.data?.message || "Error updating product";
@@ -91,14 +86,12 @@ export const useProduct = () => {
     const deleteProduct = async (id) => {
         setLoading(true);
         setError(null);
-        console.log(`Deleting product with ID: ${id}`);
         try {
             await axios.delete(`${BASE_URL}/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            console.log("Product deleted:", id);
         } catch (err) {
             const message = err.response?.data?.message || "Error deleting product";
             setError(message);
@@ -112,13 +105,11 @@ export const useProduct = () => {
     const searchProducts = async (query) => {
         setLoading(true);
         setError(null);
-        console.log(`Searching products with query: ${query}`);
         try {
             const { data } = await axios.get(`${BASE_URL}/search/query`, {
                 params: { query },
             });
             setProducts(data.products || []);
-            console.log("Search results:", data.products);
         } catch (err) {
             const message = err.response?.data?.message || "Error searching products";
             setError(message);

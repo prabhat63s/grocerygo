@@ -1,19 +1,17 @@
 import { useEffect, useState } from "react";
-import CommonLayout from '../../components/layout/CommonLayout'
+import CommonLayout from '../../components/layout/CommonLayout';
 import Select from "react-select";
 import { FaTrash } from "react-icons/fa";
 import axios from "axios";
 import { useProduct } from "../../hook/useProduct";
 
-
 export default function TopDeal() {
+    const [fetchedTopDeals, setFetchedTopDeals] = useState([]);
+    const { products, fetchAllProducts } = useProduct();
     const [dealType, setDealType] = useState("2");
     const [toggleTopDeal, setToggleTopDeal] = useState(true);
     const [offerType, setOfferType] = useState("2");
     const [selectedProducts, setSelectedProducts] = useState([]);
-    const [fetchedTopDeals, setFetchedTopDeals] = useState([]);
-
-    const { products, fetchAllProducts } = useProduct();
 
     useEffect(() => {
         fetchAllProducts();
@@ -24,38 +22,12 @@ export default function TopDeal() {
         label: product.name,
     }));
 
-    const handleSubmit = async () => {
-        try {
-            const payload = {
-                dealType,
-                todaySpecial: toggleTopDeal,
-                offerType,
-                productIds: selectedProducts,
-                startDate: document.querySelector('[name="top_deals_start_date"]').value,
-                endDate: document.querySelector('[name="top_deals_end_date"]').value,
-                startTime: document.querySelector('[name="top_deals_start_time"]').value,
-                endTime: document.querySelector('[name="top_deals_end_time"]').value,
-                discount: document.querySelector('[name="amount"]').value,
-            };
-
-            await axios.post(`${import.meta.env.VITE_BASE_URL}/top-deals`, payload, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
-
-            fetchTopDeals(); // refresh the list
-        } catch (error) {
-            console.error("Failed to save top deal", error);
-        }
-    };
-
     const fetchTopDeals = async () => {
         try {
             const { data } = await axios.get(`${import.meta.env.VITE_BASE_URL}/top-deals`);
             setFetchedTopDeals(data);
         } catch (error) {
-            console.error("Failed to fetch sliders", error);
+            console.error("Failed to fetch top deals", error);
         }
     };
 
@@ -64,17 +36,57 @@ export default function TopDeal() {
     }, []);
 
     const handleDelete = async (id) => {
-        if (window.confirm("Are you sure you want to delete this slider?")) {
+        if (window.confirm("Are you sure you want to delete this top deal?")) {
             try {
                 await axios.delete(`${import.meta.env.VITE_BASE_URL}/top-deals/${id}`, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("token")}`,
                     },
                 });
-                setFetchedTopDeals(prev => prev.filter(slider => slider._id !== id));
+                setFetchedTopDeals(prev => prev.filter(deal => deal._id !== id));
             } catch (err) {
-                console.error("Failed to delete slider", err);
+                console.error("Failed to delete top deal", err);
             }
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (selectedProducts.length === 0) {
+            alert("Please select at least one product.");
+            return;
+        }
+
+        const startDate = document.querySelector('[name="top_deals_start_date"]')?.value || "";
+        const endDate = document.querySelector('[name="top_deals_end_date"]')?.value || "";
+        const startTime = document.querySelector('[name="top_deals_start_time"]')?.value || "";
+        const endTime = document.querySelector('[name="top_deals_end_time"]')?.value || "";
+        const discount = document.querySelector('[name="amount"]')?.value || "";
+
+        const payload = {
+            dealType,
+            topDeal: toggleTopDeal,
+            offerType,
+            discountType: offerType === "1" ? "fixed" : "percentage",
+            startDate,
+            endDate,
+            startTime,
+            endTime,
+            discount,
+            products: selectedProducts.map((id) => ({ productId: id })),
+        };
+
+        try {
+            await axios.post(`${import.meta.env.VITE_BASE_URL}/top-deals`, payload, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            fetchTopDeals(); // Refresh the list of top deals
+        } catch (error) {
+            console.error("Failed to save top deal", error);
         }
     };
 
@@ -82,15 +94,15 @@ export default function TopDeal() {
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
 
-    // Filter categories based on search
     const filteredTopDeals = fetchedTopDeals.filter(topDeal =>
-        (topDeal.name && topDeal.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        topDeal.products?.some(p =>
+            p.productId?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+        )
     );
 
     const totalPages = Math.ceil(filteredTopDeals.length / rowsPerPage);
     const indexOfLast = currentPage * rowsPerPage;
     const indexOfFirst = indexOfLast - rowsPerPage;
-    // Only show the rows on the current page
     const currentTopDeals = filteredTopDeals.slice(indexOfFirst, indexOfLast);
 
     const handlePrev = () => {
@@ -107,20 +119,17 @@ export default function TopDeal() {
                 <div className="flex justify-between md:flex-row flex-col gap-3 md:items-center">
                     <h1 className="text-2xl font-semibold">Top Deal</h1>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-md shadow">
+
+                <form onSubmit={handleSubmit} className="p-4 bg-gray-50 rounded-md shadow">
                     <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                         <div>
-                            <label className="block font-medium mb-1">
-                                Deals Type <span className="text-red-500">*</span>
-                            </label>
-
+                            <label className="block font-medium mb-1">Deals Type <span className="text-red-500">*</span></label>
                             <select
                                 className="w-full border rounded px-3 py-2"
                                 value={dealType}
                                 onChange={(e) => setDealType(e.target.value)}
                                 required
                             >
-                                <option value="">Select</option>
                                 <option value="1">One Time</option>
                                 <option value="2">Daily</option>
                             </select>
@@ -145,88 +154,67 @@ export default function TopDeal() {
                         {toggleTopDeal && (
                             <>
                                 <div>
-                                    <label className="block font-medium mb-1">
-                                        Start Date <span className="text-red-500">*</span>
-                                    </label>
+                                    <label className="block font-medium mb-1">Start Date <span className="text-red-500">*</span></label>
                                     <input
                                         type="date"
                                         name="top_deals_start_date"
                                         className="w-full border rounded px-3 py-2"
-                                        defaultValue="2024-10-28"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block font-medium mb-1">
-                                        End Date <span className="text-red-500">*</span>
-                                    </label>
+                                    <label className="block font-medium mb-1">End Date <span className="text-red-500">*</span></label>
                                     <input
                                         type="date"
                                         name="top_deals_end_date"
                                         className="w-full border rounded px-3 py-2"
-                                        defaultValue="2024-10-29"
                                     />
                                 </div>
                             </>
                         )}
 
                         <div>
-                            <label className="block font-medium mb-1">
-                                Start Time <span className="text-red-500">*</span>
-                            </label>
+                            <label className="block font-medium mb-1">Start Time <span className="text-red-500">*</span></label>
                             <input
                                 type="time"
                                 name="top_deals_start_time"
                                 className="w-full border rounded px-3 py-2"
-                                defaultValue="01:44:00"
                             />
                         </div>
 
                         <div>
-                            <label className="block font-medium mb-1">
-                                End Time <span className="text-red-500">*</span>
-                            </label>
+                            <label className="block font-medium mb-1">End Time <span className="text-red-500">*</span></label>
                             <input
                                 type="time"
                                 name="top_deals_end_time"
                                 className="w-full border rounded px-3 py-2"
-                                defaultValue="19:01:00"
                             />
                         </div>
 
                         <div>
-                            <label className="block font-medium mb-1">
-                                Discount Type <span className="text-red-500">*</span>
-                            </label>
+                            <label className="block font-medium mb-1">Discount Type <span className="text-red-500">*</span></label>
                             <select
                                 className="w-full border rounded px-3 py-2"
                                 value={offerType}
                                 onChange={(e) => setOfferType(e.target.value)}
                                 required
                             >
-                                <option value="">Select</option>
                                 <option value="1">Fixed</option>
                                 <option value="2">Percentage</option>
                             </select>
                         </div>
 
                         <div>
-                            <label className="block font-medium mb-1">
-                                Discount <span className="text-red-500">*</span>
-                            </label>
+                            <label className="block font-medium mb-1">Discount <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 className="w-full border rounded px-3 py-2"
                                 name="amount"
                                 placeholder="Discount"
-                                defaultValue="20"
                             />
                         </div>
 
-
                         <div>
-                            <label className="block font-medium mb-1">
-                                Products
-                            </label>
+                            <label className="block font-medium mb-1">Products</label>
                             <Select
                                 isMulti
                                 options={options}
@@ -238,18 +226,16 @@ export default function TopDeal() {
                             />
                         </div>
 
-
                         <div className="md:col-span-2 text-end">
                             <button
-                                type="button"
+                                type="submit"
                                 className="bg-black text-white px-5 py-2 rounded"
-                                onClick={handleSubmit}
                             >
                                 Save
                             </button>
                         </div>
                     </div>
-                </div>
+                </form>
 
                 <div className="p-4 bg-white rounded-md shadow">
                     <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-4">
@@ -288,24 +274,22 @@ export default function TopDeal() {
                                     <tr className={idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"} key={deal._id}>
                                         <td className="border px-4 py-2">{indexOfFirst + idx + 1}</td>
                                         <td className="border px-4 py-2">
-                                            {deal.products?.map((p) => p.productId?.name).join(", ")}
+                                            {deal.products?.map((prod) => prod.productId?.name).join(", ")}
                                         </td>
-
                                         <td className="border px-3 py-2">{new Date(deal.createdAt).toLocaleString()}</td>
                                         <td className="border px-3 py-2">{new Date(deal.updatedAt).toLocaleString()}</td>
-                                        <td className="border px-4 py-2 text-white">
-                                            <div className="flex items-center gap-2">
-                                                <button onClick={() => handleDelete(deal._id)} className="bg-red-500 hover:bg-red-600 p-1.5 rounded-md" title="Delete">
-                                                    <FaTrash />
-                                                </button>
-                                            </div>
+                                        <td className="border px-4 py-2">
+                                            <button
+                                                onClick={() => handleDelete(deal._id)}
+                                                className="text-red-500"
+                                            >
+                                                <FaTrash />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
-
                         </table>
-
                     </div>
 
                     {/* Pagination Footer */}
@@ -338,5 +322,5 @@ export default function TopDeal() {
                 </div>
             </div>
         </CommonLayout>
-    )
+    );
 }

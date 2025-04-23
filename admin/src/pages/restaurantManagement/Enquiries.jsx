@@ -11,6 +11,8 @@ export default function Enquiries() {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
 
+  console.log(enquiries)
+
   // --- Fetch from /api/contactus ---
   const fetchEnquiries = async () => {
     if (!token) return;

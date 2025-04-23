@@ -55,6 +55,7 @@ export default function Blogs() {
   const endIndex = startIndex + itemsPerPage;
   const currentItems = filteredBlogs.slice(startIndex, endIndex);
 
+  console.log(currentItems)
 
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);

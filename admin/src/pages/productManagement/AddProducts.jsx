@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import CommonLayout from '../../components/layout/CommonLayout';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import AddVariantsModal from '../../components/modals/AddVariantsModal';
@@ -12,6 +12,7 @@ import Select from "react-select";
 
 
 export default function AddProducts() {
+    const { id } = useParams();
     const { createProduct } = useProduct();
     const { categories } = useCategory();
     const { subCategories } = useSubCategory();

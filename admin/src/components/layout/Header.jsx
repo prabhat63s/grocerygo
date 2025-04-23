@@ -74,7 +74,7 @@ export default function Header() {
                 {openSidebar && (
                     <div className="fixed inset-0 z-50 flex">
                         {/* Sidebar content */}
-                        <div className={` fixed top-0 left-0 h-full w-[65%] bg-black text-white shadow-lg p-4 z-50  transform transition-transform duration-300 ${openSidebar ? 'translate-x-0' : '-translate-x-full'} `} >
+                        <div className={` fixed top-0 left-0 h-full w-[65%] bg-black text-white shadow-lg p-4 z-50  transform transition-transform duration-300 overflow-y-auto ${openSidebar ? 'translate-x-0' : '-translate-x-full'} `} >
                             <Sidebar setOpenSidebar={setOpenSidebar} />
                         </div>
                     </div>

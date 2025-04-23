@@ -87,7 +87,6 @@ export default function LoginPage() {
                                 autoComplete="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                defaultValue={"admin@gmail.com"}
                                 className="mt-1 p-1.5 w-full border border-gray-300 rounded-md"
                             />
                             {errors.email && <p className="mt-1 text-red-500 text-xs">{errors.email}</p>}
@@ -104,7 +103,6 @@ export default function LoginPage() {
                                     autoComplete="current-password"
                                     value={formData.password}
                                     onChange={handleChange}
-                                    defaultValue={"12@Prabhat"}
                                     className="p-2 pr-10 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                                 <button
