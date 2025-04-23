@@ -7,15 +7,22 @@ export const createProduct = async (req, res) => {
     const {
       name, sku, videoURL, category, subCategory, type,
       hasExtras, extras, hasVariants, variants,
-      originalPrice, sellingPrice, stockManagement, stock, description, tax
+      originalPrice, sellingPrice, stockManagement, stock, description, tax,
+      todaySpecial, status
     } = req.body;
 
     // Image
     const domainName = req.protocol + "://" + req.get("host");
     const productImage = req.files?.map(file => `${domainName}/uploads/products/${file.filename}`) || [];
 
-    if (!name || !category || !type || !originalPrice || !sellingPrice || productImage.length === 0) {
-      return res.status(400).json({ message: "Name, category, type, prices and at least one image are required." });
+    if (!name || !category || !type || productImage.length === 0) {
+      return res.status(400).json({ message: "Name, category, type, and at least one image are required." });
+    }
+
+    if (hasVariants === "false" || hasVariants === false) {
+      if (!originalPrice || !sellingPrice) {
+        return res.status(400).json({ message: "Original and selling prices are required when hasVariants is false." });
+      }
     }
 
     let parsedExtras = [], parsedVariants = [], parsedStockManagement = [], parsedTax = [];
@@ -34,16 +41,22 @@ export const createProduct = async (req, res) => {
       return res.status(400).json({ message: "Invalid JSON format in extras, variants, or stock." });
     }
 
-    const normalizedName = name.trim();
-    const productExists = await Product.findOne({ name: normalizedName });
-    if (productExists) {
-      return res.status(400).json({ message: "Product already exists" });
+    const normalizedSku = sku.trim().toLowerCase();
+    const existingProduct = await Product.findOne({ sku: normalizedSku });
+    if (existingProduct) {
+      return res.status(400).json({ message: "SKU already exists" });
     }
 
     const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
     const categoryId = isValidObjectId(category) ? new mongoose.Types.ObjectId(category) : null;
     const subCategoryId = isValidObjectId(subCategory) ? new mongoose.Types.ObjectId(subCategory) : null;
 
+    if (!categoryId) {
+      return res.status(400).json({ message: "Invalid category ID" });
+    }
+    if (!subCategoryId) {
+      return res.status(400).json({ message: "Invalid sub-category ID" });
+    }
 
     let taxIds = [];
     try {
@@ -55,9 +68,10 @@ export const createProduct = async (req, res) => {
       return res.status(400).json({ message: "Invalid tax format" });
     }
 
-    const product = new Product({
-      name: normalizedName,
-      sku,
+    // If variants are present, do not use the root-level stockManagement and stock
+    const productData = {
+      name,
+      sku: normalizedSku,
       videoURL,
       category: categoryId,
       subCategory: subCategoryId,
@@ -66,14 +80,22 @@ export const createProduct = async (req, res) => {
       extras: parsedExtras,
       hasVariants,
       variants: parsedVariants,
-      originalPrice,
-      sellingPrice,
-      stockManagement,
-      stock: parsedStockManagement,
       description,
       tax: taxIds,
-      productImage
-    });
+      productImage,
+      todaySpecial: todaySpecial !== undefined ? todaySpecial : true,
+      status: status !== undefined ? status : true,
+    };
+
+    // Set originalPrice, sellingPrice, stockManagement, and stock only if variants are false
+    if (hasVariants === false) {
+      productData.originalPrice = originalPrice;
+      productData.sellingPrice = sellingPrice;
+      productData.stockManagement = stockManagement;
+      productData.stock = parsedStockManagement;
+    }
+
+    const product = new Product(productData);
 
     // Save product first!
     const createdProduct = await product.save();
@@ -91,6 +113,7 @@ export const createProduct = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Get all products
 export const getAllProducts = async (req, res) => {
@@ -125,6 +148,7 @@ export const updateProduct = async (req, res) => {
       name, sku, videoURL, category, subCategory, type,
       hasExtras, extras, hasVariants, variants,
       originalPrice, sellingPrice, stockManagement, stock, description, tax,
+      todaySpecial, status
     } = req.body;
 
     // Parse JSON data for extras, variants, and stockManagement
@@ -166,6 +190,9 @@ export const updateProduct = async (req, res) => {
     product.stock = parsedStockManagement.length > 0 ? parsedStockManagement : product.stock;
     product.description = description || product.description;
     product.tax = parsedTax.length > 0 ? parsedTax : product.tax;
+    product.todaySpecial = todaySpecial !== undefined ? todaySpecial : product.todaySpecial;
+    product.status = status !== undefined ? status : product.status;
+
 
     if (req.files && req.files.length > 0) {
       const domainName = req.protocol + "://" + req.get("host");

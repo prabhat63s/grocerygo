@@ -94,7 +94,7 @@ export default function Banner() {
               .replace(/-/g, ' ')
               .replace(/\b\w/g, (char) => char.toUpperCase())}
           </h1>
-          <Link to={`/admin/${type}/add`} className="px-5 flex gap-2 items-center justify-center py-1.5 bg-black hover:bg-neutral-700 text-white rounded">
+          <Link to={`/admin/banner/${type}/add`} className="px-5 flex gap-2 items-center justify-center py-1.5 bg-black hover:bg-neutral-700 text-white rounded">
             <FaPlus /> Add New
           </Link>
 
@@ -160,7 +160,7 @@ export default function Banner() {
                     <td className="border px-4 py-2 text-white">
                       <div className="flex items-center gap-2">
                         <Link
-                          to={`/admin/${type}/${banner._id}`}
+                          to={`/admin/banner/${type}/${banner._id}`}
                           className="bg-blue-500 hover:bg-blue-600 p-1.5 rounded-md"
                           title="Edit"
                         >

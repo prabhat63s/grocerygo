@@ -15,7 +15,6 @@ export default function Enquiries() {
 
   // --- Fetch from /api/contactus ---
   const fetchEnquiries = async () => {
-    if (!token) return;
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_BASE_URL}/contactus`,

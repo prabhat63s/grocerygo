@@ -14,7 +14,6 @@ export default function Tutorial() {
 
   // --- Fetch from /api/contactus ---
   const fetchTotorial = async () => {
-    if (!token) return;
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_BASE_URL}/tutorial`,

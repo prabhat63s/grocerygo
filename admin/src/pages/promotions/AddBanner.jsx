@@ -107,7 +107,7 @@ export default function AddBanner() {
       <div className="flex flex-col gap-5 p-5">
         <div className="flex justify-between md:flex-row flex-col gap-3 md:items-center">
           <h1 className="text-2xl font-semibold">
-            <Link to={`/admin/${type}`}>
+            <Link to={`/admin/banner/${type}`}>
               {type.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())}
             </Link> / {bannerId ? 'Edit' : 'Add New'}
           </h1>

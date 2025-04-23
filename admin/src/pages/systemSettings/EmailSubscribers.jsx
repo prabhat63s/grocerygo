@@ -15,7 +15,6 @@ export default function EmailSubscribers() {
 
     // --- Fetch from /api/newsletter ---
     const fetchSubscribers = async () => {
-        if (!token) return;
         try {
             const res = await axios.get(
                 `${import.meta.env.VITE_BASE_URL}/newsletter`,
